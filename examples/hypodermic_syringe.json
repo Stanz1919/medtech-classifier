@@ -1,0 +1,10 @@
+{
+  "name": "Hypodermic Syringe (single-use, non-implantable)",
+  "description": "Sterile single-use syringe for injecting medicinal products, short-term surgically invasive contact.",
+  "invasiveness": "surgically_invasive",
+  "duration": "transient",
+  "is_implantable": false,
+  "administers_medicinal_product": true,
+  "administration_potentially_hazardous": false,
+  "placed_on_market_sterile": true
+}

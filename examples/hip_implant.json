@@ -1,0 +1,8 @@
+{
+  "name": "Total Hip Replacement Prosthesis",
+  "description": "Metal-on-polyethylene total hip joint replacement implant.",
+  "invasiveness": "surgically_invasive",
+  "duration": "long_term",
+  "is_implantable": true,
+  "is_joint_replacement": true
+}

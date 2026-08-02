@@ -1,0 +1,58 @@
+Source: Regulation (EU) 2017/745, Article 51 (Classification of devices) and Article 52(7) (sub-qualifiers Is/Im/Ir for Class I devices)
+Retrieved from: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745
+CELEX number: 32017R0745
+Retrieved on: 2026-08-02
+NOTE: Article 52(7) is the legal basis for the informal Is/Im/Ir sub-qualifiers (sterile / measuring function / reusable surgical instrument) applied to Class I devices. These are NOT separate Annex VIII classification outcomes — they only affect the scope of notified body involvement in conformity assessment.
+================================================================================
+
+Article 51
+
+Classification of devices
+
+1.   Devices shall be divided into classes I, IIa, IIb and III, taking into account the intended purpose of the devices and their inherent risks. Classification shall be carried out in accordance with Annex VIII.
+
+2.   Any dispute between the manufacturer and the notified body concerned, arising from the application of Annex VIII, shall be referred for a decision to the competent authority of the Member State in which the manufacturer has its registered place of business. In cases where the manufacturer has no registered place of business in the Union and has not yet designated an authorised representative, the matter shall be referred to the competent authority of the Member State in which the authorised representative referred to in the last indent of point (b) of the second paragraph of Section 2.2 of Annex IX has its registered place of business. Where the notified body concerned is established in a Member State other than that of the manufacturer, the competent authority shall adopt its decision after consultation with the competent authority of the Member State that designated the notified body.
+
+The competent authority of the Member State in which the manufacturer has its registered place of business shall notify the MDCG and the Commission of its decision. The decision shall be made available upon request.
+
+3.   At the request of a Member State the Commission shall after consulting the MDCG, decide, by means of implementing acts, on the following:
+
+(a)
+
+	
+
+application of Annex VIII to a given device, or category or group of devices, with a view to determining the classification of such devices;
+
+(b)
+
+	
+
+that a device, or category or group of devices, shall for reasons of public health based on new scientific evidence, or based on any information which becomes available in the course of the vigilance and market surveillance activities be reclassified, by way of derogation from Annex VIII.
+
+4.   The Commission may also, on its own initiative and after consulting the MDCG, decide, by means of implementing acts, on the issues referred to in points (a) and (b) of paragraph 3.
+
+5.   In order to ensure the uniform application of Annex VIII, and taking account of the relevant scientific opinions of the relevant scientific committees, the Commission may adopt implementing acts to the extent necessary to resolve issues of divergent interpretation and of practical application.
+
+6.   The implementing acts referred to in paragraphs 3, 4 and 5 of this Article shall be adopted in accordance with the examination procedure referred to in Article 114(3).
+
+SECTION 2
+
+Conformity assessment
+
+Article 52
+
+Conformity assessment procedures
+
+1.   Prior to placing a device on the market, manufacturers shall undertake an assessment of the conformity of that device, in accordance with the applicable conformity assessment procedures set out in Annexes IX to XI.
+
+2.   Prior to putting into service a device that is not placed on the market, manufacturers shall undertake an assessment of the conformity of that device, in accordance with the applicable conformity assessment procedures set out in Annexes IX to XI.
+
+3.   Manufacturers of class III devices, other than custom-made or investigational devices, shall be subject to a conformity assessment as specified in Annex IX. Alternatively, the manufacturer may choose to apply a conformity assessment as specified in Annex X coupled with a conformity assessment as specified in Annex XI.
+
+4.   Manufacturers of class IIb devices, other than custom-made or investigational devices, shall be subject to a conformity assessment as specified in Chapters I and III of Annex IX, and including an assessment of the technical documentation as specified in Section 4 of that Annex of at least one representative device per generic device group.
+
+However, for class IIb implantable devices, except sutures, staples, dental fillings, dental braces, tooth crowns, screws, wedges, plates, wires, pins, clips and connectors, the assessment of the technical documentation as specified in Section 4 of Annex IX shall apply for every device.
+
+Alternatively, the manufacturer may choose to apply a conformity assessment based on type examination as specified in Annex X coupled with a conformity assessment based on product conformity verification as specified in Annex XI.
+
+5.   Where justified in view of well-established technologies, similar to those used in the exempted devices listed in th

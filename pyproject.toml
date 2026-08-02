@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medtech-classifier"
+version = "0.1.0"
+description = "Educational EU MDR 2017/745 medical device regulatory classification tool"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+include = ["rules_engine*", "extraction*", "standards_mapper*", "ui*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
