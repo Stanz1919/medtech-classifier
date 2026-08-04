@@ -1,0 +1,84 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 11 (pages 46-47 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is not a European Commission document, and it cannot be regarded as reflecting the official position of the European Commission. Any views expressed in this document are not legally binding and only the Court of Justice of the European Union can give binding interpretations of Union law."
+Cross-reference: This section explicitly points to a second document, MDCG 2019-11 "Qualification and classification of software", for further detail. That document has NOT been separately fetched/verified - do not cite it beyond what MDCG 2021-24 itself quotes here.
+================================================================================
+
+Rule 11 – Software intended to provide information to inform decisions with diagnosis or therapeutic
+purposes or software intended to monitor physiological processes.
+General explanation of the rule
+Rule 11 describes and categorizes the risk of software based on the combination of the significance of the information provided by the software
+to the healthcare decision and the healthcare situation or patient’s condition.
+This rule also distinguishes between MDSW (medical device software) intended to monitor vital and non-vital physiological processes (the sub-
+rule only applies to software intended for monitoring purposes only).
+Software or equipment attached to devices which do not specifically enable device(s) to be used in accordance with their intended purpose, or
+to specifically or directly assist the medical functionality of the device in terms of its/their intended purpose do not meet the definition of an
+accessory.
+Software used in conjunction with medical devices(s) which solely record, store or display information would generally not be considered devices
+(see guidance MDCG 2019-11, section 3.3 for further detail). For example, software analogous to diaries for recording insulin doses would not
+be considered devices, unless an analysis is performed on the data or the device in some way alters the patients treatment, prescription, doses
+etc.
+Class Rule 11 Examples
+IIa Software intended to provide information which is used to take decisions with diagnosis or • MDSW intended to rank therapeutic suggestions
+therapeutic purposes is classified as class IIa, for a health care professional based on patient
+except if such decisions have an impact that may cause: history, imaging test results, and patient
+characteristics, for example, MDSW that lists
+and ranks all available chemotherapy options for
+BRCA-positive individuals.
+• Cognitive therapy MDSW where a specialist
+determines the necessary cognitive therapy
+based on the outcome provided by the MDSW.
+III — death or an irreversible deterioration of a person's state of health1, in which case it is in • MDSW intended to perform diagnosis by means
+class III; or of image analysis for making treatment
+decisions in patients with acute stroke.
+IIb — a serious deterioration of a person's state of health1 or a surgical intervention, in which case • A mobile app intended to analyse a user’s
+it is classified as class IIb. heartbeat, detect abnormalities and inform a
+physician accordingly.
+MDSW intended for diagnosing depression based
+on a score resulting from inputted data on
+patient symptoms (e.g. anxiety, sleep patterns,
+stress etc.).
+46
+
+===PAGE 47===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+IIa Software intended to monitor physiological processes is classified as class IIa, • MDSW intended to monitor physiological
+processes that are not considered to be vital.
+• Devices intended to be used to obtain readings
+of vital physiological signals in routine check-ups
+including monitoring at home.
+IIb except if it is intended for monitoring of vital physiological parameters3, where the nature of • Medical devices including MDSW intended to be
+variations of those parameters is such that it could result in immediate danger to the patient, used for continuous surveillance of vital
+in which case it is classified as class IIb. physiological processes in anaesthesia, intensive
+care or emergency care.
+I All other software is classified as class I. • MDSW app intended to support conception by
+calculating the user’s fertility status based on a
+validated statistical algorithm. The user inputs
+health data including basal body temperature
+(BBT) and menstruation days to track and
+predict ovulation. The fertility status of the
+current day is reflected by one of three indicator
+lights: red (fertile), green (infertile) or yellow
+(learning phase/cycle fluctuation).
+Practical issues of classification
+Note 1: The MDR contains several references to ‘serious deterioration of a person’s state of health’ and to ‘surgical intervention’, notably in the
+vigilance or clinical investigation context. Further horizontal guidance may be provided in the future and will be available at:
+https://ec.europa.eu/health/md_sector/new_regulations/guidance_en .
+Note 2: For the classification of software, it is needed to consider the intended purpose, intended population (including e.g. diseases to be
+treated and/or diagnosed), context of use (e.g. intensive care, emergency care, home use) of the software and of the information provided by
+the software as well as of the possible decisions to be taken.
+Note 3 Medical device software should be classified in the same way, regardless of the software's location or the type of interconnection
+between the software and a (hardware) device. However, in line with implementing rule 3.3 Annex VIII to the MDR, software which drives a
+device or influences the use of a device shall fall within the same class as the device.
+For further information on qualification and classification of software consult: MDCG 2019-11 Qualification and classification of software -
+Regulation (EU) 2017/745 and Regulation (EU) 2017/74628.
+28 https://ec.europa.eu/health/sites/health/files/md_sector/docs/md_mdcg_2019_11_guidance_qualification_classification_software_en.pdf
+47
+
+===PAGE 48===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1

@@ -128,6 +128,48 @@ CASES = [
         DeviceClass.IIB,
         [],
     ),
+    # --- The following four Rule 4 cases are named examples straight out of
+    # MDCG 2021-24 Rev.1, "Guidance on classification of medical devices",
+    # pages 32-33 (see docs/legal_sources/mdcg_2021-24_rule_4_wound_dressings.txt) ---
+    (
+        "Ostomy bag (MDCG 2021-24 Rule 4 worked example, Class I)",
+        {
+            "contacts_injured_skin_or_mucous_membrane": True,
+            "wound_contact_purpose": "mechanical_barrier_compression_or_absorption",
+        },
+        DeviceClass.I,
+        [],
+    ),
+    (
+        "Dressing for burns having breached the dermis (MDCG 2021-24 Rule 4 worked example, Class IIb)",
+        {
+            "contacts_injured_skin_or_mucous_membrane": True,
+            "wound_contact_purpose": "breached_dermis_secondary_intent_healing",
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Non-medicated impregnated gauze dressing (MDCG 2021-24 Rule 4 worked example, Class IIa)",
+        {
+            "contacts_injured_skin_or_mucous_membrane": True,
+            "wound_contact_purpose": "manage_microenvironment",
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Dressing for nose bleeds - invasive device on injured mucous membrane, "
+        "purpose is absorption not micro-environment management "
+        "(MDCG 2021-24 Rule 4 worked example, Class I)",
+        {
+            "invasiveness": "invasive_body_orifice",
+            "contacts_injured_skin_or_mucous_membrane": True,
+            "wound_contact_purpose": "mechanical_barrier_compression_or_absorption",
+        },
+        DeviceClass.I,
+        [],
+    ),
     (
         "Condom",
         {"is_contraceptive_or_sti_prevention": True},
@@ -181,6 +223,59 @@ CASES = [
         DeviceClass.I,
         [],
     ),
+    # --- The following six Rule 11 cases are named examples from MDCG
+    # 2021-24 Rev.1, pages 46-47 (see
+    # docs/legal_sources/mdcg_2021-24_rule_11_software.txt) ---
+    (
+        "MDSW performing diagnosis by image analysis for acute stroke treatment decisions "
+        "(MDCG 2021-24 Rule 11 named example, Class III)",
+        {"is_software": True, "software_decision_impact": "death_or_irreversible_deterioration"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Mobile app analysing heartbeat, detecting abnormalities, informing a physician "
+        "(MDCG 2021-24 Rule 11 named example, Class IIb)",
+        {"is_software": True, "software_decision_impact": "serious_deterioration_or_surgical_intervention"},
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "MDSW ranking chemotherapy options for a clinician based on patient history "
+        "(MDCG 2021-24 Rule 11 named example, Class IIa)",
+        {"is_software": True, "software_decision_impact": "other_impact"},
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "MDSW fertility-tracking app using a validated statistical algorithm "
+        "(MDCG 2021-24 Rule 11 named example, Class I)",
+        {"is_software": True},
+        DeviceClass.I,
+        [],
+    ),
+    (
+        "MDSW for continuous vital-process surveillance in anaesthesia/ICU/emergency care "
+        "(MDCG 2021-24 Rule 11 named example, Class IIb)",
+        {
+            "is_software": True,
+            "software_monitors_physiological_processes": True,
+            "software_monitors_vital_parameters_with_immediate_danger_potential": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "MDSW obtaining routine vital-sign readings at home/check-ups "
+        "(MDCG 2021-24 Rule 11 named example, Class IIa)",
+        {
+            "is_software": True,
+            "software_monitors_physiological_processes": True,
+            "software_monitors_vital_parameters_with_immediate_danger_potential": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
     (
         "Digital X-ray image recording device",
         {"is_xray_diagnostic_image_recording_device": True},
@@ -201,6 +296,56 @@ CASES = [
         "Ancillary bone screw within a joint-replacement system",
         {"is_implantable": True, "is_joint_replacement": True, "is_ancillary_component": True},
         DeviceClass.IIB,
+        [],
+    ),
+    # --- The following Rule 8 cases are named examples from MDCG 2021-24
+    # Rev.1, pages 38-41 (see docs/legal_sources/mdcg_2021-24_rule_8_implants.txt) ---
+    (
+        "Pedicle screw for spinal fixation (MDCG 2021-24 Rule 8 named example, ancillary -> IIb)",
+        {
+            "is_implantable": True,
+            "is_spinal_disc_replacement_or_contacts_spinal_column": True,
+            "is_ancillary_component": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Hook fixing rod to the spinal column (MDCG 2021-24 Rule 8, Note 7, ancillary -> IIb)",
+        {
+            "is_implantable": True,
+            "is_spinal_disc_replacement_or_contacts_spinal_column": True,
+            "is_ancillary_component": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Dental implant post/abutment anchored in jawbone (MDCG 2021-24 Rule 8, Note 4 -> IIb, NOT IIa)",
+        {"is_implantable": True, "placed_in_teeth": False},
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Dental filling material and pins (MDCG 2021-24 Rule 8 named example, genuinely 'in the teeth' -> IIa)",
+        {"is_implantable": True, "placed_in_teeth": True},
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Knee replacement (MDCG 2021-24 Rule 8 named example, Class III)",
+        {"is_implantable": True, "is_joint_replacement": True, "is_ancillary_component": False},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Interbody spinal fusion device (MDCG 2021-24 Rule 8 named example, Class III)",
+        {
+            "is_implantable": True,
+            "is_spinal_disc_replacement_or_contacts_spinal_column": True,
+            "is_ancillary_component": False,
+        },
+        DeviceClass.III,
         [],
     ),
     (

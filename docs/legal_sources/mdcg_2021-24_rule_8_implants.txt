@@ -1,0 +1,122 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 8 (pages 38-41 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is not a European Commission document, and it cannot be regarded as reflecting the official position of the European Commission. Any views expressed in this document are not legally binding and only the Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 8 - Implantable devices and long-term surgically invasive devices (> 30 days)
+General explanation of the rule
+These are mostly implants in the orthopaedic, dental, ophthalmic and cardiovascular fields as well as soft tissue implants such as implants used
+in plastic surgery.
+38
+
+===PAGE 39===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+Class Rule 8 Examples
+IIb All implantable devices and long-term surgically invasive devices are classified as class IIb1 • Artificial ligaments for reinforcement3
+• Dental implants and abutments
+• Shunts
+• Peripheral stents and peripheral valves
+• Plates
+• Intra-ocular lenses
+• Internal closure devices (including vascular
+closure devices2)
+• Tissue augmentation implants (excluding
+breasts)
+• Peripheral vascular catheters for long-term use
+• Peripheral vascular grafts and stents
+unless they: • Penile implants
+• Non-absorbable sutures, non-biodegreable bone
+cements and maxillo-facial implants, visco-
+elastic surgical devices intended specifically for
+ophthalmic anterior segment surgery3
+• Pedicle screws
+• Hooks that fix rods on the spinal column
+IIa - are intended to be placed in the teeth4, in which case they are classified as class IIa; • Bridges and crowns
+• Dental filling materials and pins
+• Dental alloys, ceramics and polymers
+III - are intended to be used in direct contact with the heart, the central circulatory system or • Prosthetic heart valves
+the central nervous system, in which case they are classified as class III; • Aneurysm clips
+• Vascular prosthesis and stents
+• Central vascular catheters for long-term use
+• Spinal stents
+• CNS electrodes
+• Cardiovascular sutures
+• Permanent and retrievable vena cava filters
+• Septal occlusion devices
+• Intra-aortic balloon pumps
+• External left ventricular assisting devices
+III - have a biological effect or are wholly or mainly absorbed, in which case they are classified • Long term absorbable sutures
+as class III; • Adhesives and implantable devices claimed to be
+bioactive through the attachment of surface
+coatings such as phosphoryl choline
+• Biodegrable Bone Cements
+• Elastoviscus fluids for joint movement(eg.
+hyaluronan of non-animal origin)
+39
+
+===PAGE 40===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+III - are intended to undergo chemical change5 in the body in which case they are classified as
+class III, except if the devices are placed in the teeth
+III - are intended to administer medicinal products, in which case they are classified as class III; • Rechargeable non-active drug delivery systems
+• Peritoneal dialysis
+III - are active implantable devices or their accessories, in which cases they are classified as • Cochlear implants and accessories
+class III; • Implantable cardiac pacemakers
+• Implantable cardioverter defibrillators (ICD)
+• Leads, electrodes, adaptors for pacemakers and
+implantable defibrillators
+• Implantable nerve stimulators
+• Implantable bladder stimulators
+• Implantable sphincter stimulators
+• Accessories to active implantable devices (with
+or without contact to the heart), be it
+implantable or non-implantable active or not6:
+• torque wrench for implantable pulse
+generator / implantable cardioverter
+defibrillator
+• cables for programmer / pacing system
+analyser
+• magnet for Implantable Pulse Generator /
+Implantable Cardioverter Generator
+• programmer or an external transmitter
+intended for activating or controlling the
+implantable part of the device
+• implantable pacemaker leads
+III - are breast implants or surgical meshes, in which cases they are classified as class III; • Breast implants
+• Breast tissue expanders
+• Surgical meshes for hernia repair
+• Tension free vaginal tape
+III - are total or partial joint replacements, in which case they are classified as class III, with • Hip, knee
+the exception of ancillary components such as screws, wedges, plates and instruments; • Shoulder
+• Ankle
+or
+III - are spinal disc replacement implants or are implantable devices that come into contact with • Spinal disc replacement implants
+the spinal column7, in which case they are classified as class III with the exception of • Device placed in the disc space
+components such as screws, wedges, plates and instruments • Interbody fusion devices
+40
+
+===PAGE 41===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+Practical issues of classification
+Note 1: Article 52(4) states: “ […] for class IIb implantable devices, except sutures, staples, dental fillings, dental braces, tooth crowns, screws,
+wedges, plates, wires, pins, clips and connectors, the assessment of the technical documentation as specified in Section 4 of Annex IX shall
+apply for every device.” This does not imply classification of all sutures, staples, dental fillings, dental braces, tooth crowns, screws, wedges,
+plates, wires, pins, clips and connectors as class IIb. Such devices must be classified in their own right according to their intended purpose and
+the applicable rules.
+Note 2: For closure of arteriotomies in the peripheral vascular system (refer to definition of central circulatory system).
+Note 3: These devices are implants because in normal conditions a significant amount of the substance remains at the surgical site after the
+procedure. Rule 18 may also be relevant.
+Note 4: Implants without bioactive coatings intended to secure teeth or prostheses to the maxillary or mandibular bones are in Class IIb
+following the general rule.
+Note 5: The clause about chemical change under this rule does not apply to products such as bone cements where the chemical change takes
+place during the placement and does not continue in long term.
+Note 6: Also non-implantable and non-active accessories to AIMDs should be classified as Class III under Rule 8.
+Note 7: Contact with the spinal column should be understood as intended contact with any of the bony structures forming the column (cervical,
+thoracic, lumbar, sacral and coccyx) including the spinous and transverse processes of the vertebrae. Hooks that fix rods on the spinal column
+are considered similar to “screws, wedges, plates and instruments” exemption in the last indent of Rule 8.

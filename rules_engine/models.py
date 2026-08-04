@@ -218,6 +218,12 @@ class DeviceAttributes:
     # --- Contact with critical anatomy (Rules 6-8) ---
     contacts_heart_or_central_circulatory_system: bool = False
     contacts_central_nervous_system: bool = False
+    # NARROWER than "dental implant" colloquially suggests. Per MDCG 2021-24
+    # Note 4: implants anchored in the jawbone (e.g. a dental implant post/
+    # abutment) stay at Rule 8's IIb base class - they do NOT get the "placed
+    # in the teeth" -> IIa exception. Only devices genuinely placed within
+    # tooth structure (fillings, crowns, bridges, dental alloys/ceramics/
+    # polymers) should set this True. See docs/CLARIFICATIONS_RULE_8.md.
     placed_in_teeth: bool = False
     is_spinal_disc_replacement_or_contacts_spinal_column: bool = False
     is_joint_replacement: bool = False

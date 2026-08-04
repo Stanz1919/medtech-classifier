@@ -150,7 +150,10 @@ def test_rule4_breached_dermis_is_class_iib():
     )
     outcome = Rule4().evaluate(device)
     assert outcome.device_class == DeviceClass.IIB
-    assert outcome.ambiguous
+    # Not flagged ambiguous: MDCG 2021-24 confirms "highest class wins" is
+    # the correct, non-discretionary precedence for Rule 4's bullets - see
+    # docs/CLARIFICATIONS_RULE_4.md.
+    assert not outcome.ambiguous
 
 
 def test_rule4_applies_to_invasive_devices_touching_injured_mucous_membrane():

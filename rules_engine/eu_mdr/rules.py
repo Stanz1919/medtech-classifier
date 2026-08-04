@@ -251,6 +251,24 @@ class Rule4(ClassificationRule):
     skin or mucous membrane; and - class IIa in all other cases. This
     rule applies also to the invasive devices that come into contact with
     injured mucous membrane." (Annex VIII, 4.4)
+
+    Precedence when a device could plausibly fit more than one bullet is
+    explicitly confirmed - not left to interpretation - by official
+    guidance: MDCG 2021-24 Rev.1, "Guidance on classification of medical
+    devices" (pages 32-33): "Most dressings that are intended for a use
+    that falls under class IIa or IIb also perform functions that are in
+    class I, e.g. that of a mechanical barrier. Such devices are
+    nevertheless classified according to their intended use in the higher
+    class." This is exactly the max-of-matched-bullets logic implemented
+    below, so it is not flagged as an engine-level ambiguity.
+
+    The genuine judgement call MDCG identifies is upstream of this rule,
+    at the point of determining the manufacturer's *intended purpose*
+    from a device description: "it is impossible to say a priori that a
+    particular type of dressing belongs to a given class without knowing
+    its intended use as defined by the manufacturer." That is a Phase 2
+    (extraction) concern, not something this rule's logic can resolve -
+    see docs/CLARIFICATIONS_RULE_4.md.
     """
 
     rule_id = "Rule 4"
@@ -302,20 +320,6 @@ class Rule4(ClassificationRule):
                 else "Device does not contact injured skin or mucous membrane; Rule 4 does not apply."
             ),
             source_citation=self.source_citation,
-            ambiguous=gate,
-            ambiguous_note=(
-                "Rule 4's four bullets are drafted as a parallel descriptive list "
-                "rather than a base rule with explicit 'unless' exceptions "
-                "(contrast Rules 6-8). Where a device's wound-contact purpose "
-                "could plausibly satisfy more than one bullet (e.g. a dressing "
-                "that both manages the micro-environment and forms a mechanical "
-                "barrier), this implementation applies Annex VIII 3.5's "
-                "'highest classification wins' principle across the matched "
-                "bullets. A notified body may reasonably weigh 'principally "
-                "intended' language differently; treat this as a judgement call."
-                if gate
-                else None
-            ),
         )
 
 
@@ -530,6 +534,36 @@ class Rule8(ClassificationRule):
     that come into contact with the spinal column, in which case... class
     III with the exception of components such as screws, wedges, plates
     and instruments." (Annex VIII, 5.4)
+
+    Two nuances confirmed against official guidance - MDCG 2021-24 Rev.1,
+    "Guidance on classification of medical devices" (pages 38-41; see
+    docs/legal_sources/mdcg_2021-24_rule_8_implants.txt and
+    docs/CLARIFICATIONS_RULE_8.md):
+
+    1. "Ancillary components" has real named examples, not just abstract
+       wording: MDCG lists **pedicle screws** and, per its Note 7, **hooks
+       that fix rods on the spinal column** as staying at the Rule 8 base
+       class (IIb) rather than escalating to III alongside the joint/spinal
+       implant they're part of. But MDCG's Note 1 is explicit that this is
+       NOT a blanket "screws are always ancillary" rule: "This does not
+       imply classification of all sutures, staples, dental fillings,
+       dental braces, tooth crowns, screws, wedges, plates, wires, pins,
+       clips and connectors as class IIb. Such devices must be classified
+       in their own right according to their intended purpose and the
+       applicable rules." Each component still needs its own intended-
+       purpose classification - the carve-out just means fixation hardware
+       doesn't automatically inherit the III of the implant it's attached
+       to.
+    2. The "placed in the teeth" -> IIa exception is narrower than it
+       sounds. MDCG's Note 4: "Implants without bioactive coatings
+       intended to secure teeth or prostheses to the maxillary or
+       mandibular bones are in Class IIb following the general rule."
+       I.e. a dental implant *post* anchored in the jawbone stays at the
+       Rule 8 base class (IIb) - MDCG lists "Dental implants and
+       abutments" as a IIb example, not IIa. Only things genuinely placed
+       *within* tooth structure (fillings, crowns, bridges, dental
+       alloys/ceramics/polymers) get the IIa exception. The
+       `placed_in_teeth` attribute should be populated accordingly.
     """
 
     rule_id = "Rule 8"
@@ -579,10 +613,16 @@ class Rule8(ClassificationRule):
             ambiguous_note=(
                 "Device is flagged as an 'ancillary component' (screw, wedge, "
                 "plate, instrument) of a joint replacement or spinal implant "
-                "system, which the rule text exempts from Class III. Whether a "
-                "specific component genuinely qualifies as 'ancillary' rather "
-                "than a load-bearing/functional part of the implant is a "
-                "fact-specific judgement notified bodies routinely dispute."
+                "system, which the rule text exempts from Class III. MDCG "
+                "2021-24 confirms real examples of this carve-out (pedicle "
+                "screws; hooks fixing rods to the spinal column, per its Note "
+                "7) - so this is not pure guesswork - but its Note 1 is "
+                "explicit that there is no blanket rule: each component must "
+                "still be classified 'in their own right according to their "
+                "intended purpose and the applicable rules'. Whether THIS "
+                "component is genuinely fixation hardware versus a load-"
+                "bearing/functional part of the implant is a fact-specific "
+                "judgement; see docs/CLARIFICATIONS_RULE_8.md."
                 if ambiguous
                 else None
             ),
@@ -720,6 +760,35 @@ class Rule11(ClassificationRule):
     such that it could result in immediate danger to the patient, in
     which case it is classified as class IIb. All other software is
     classified as class I." (Annex VIII, 6.3)
+
+    Verified against official guidance - MDCG 2021-24 Rev.1, "Guidance on
+    classification of medical devices" (pages 46-47; see
+    docs/legal_sources/mdcg_2021-24_rule_11_software.txt and
+    docs/CLARIFICATIONS_RULE_11.md), which itself points to the dedicated
+    MDCG 2019-11 "Qualification and classification of software" guidance
+    for further detail (that document has not separately been fetched -
+    only what MDCG 2021-24 quotes from it is relied on here).
+
+    Two things confirmed from the real text, not assumed:
+    1. Severity is explicitly context-dependent, not a property of the
+       software alone - MDCG's Note 2: "it is needed to consider the
+       intended purpose, intended population..., context of use (e.g.
+       intensive care, emergency care, home use)... as well as of the
+       possible decisions to be taken." The same monitoring algorithm can
+       be IIa (home use) or IIb (ICU) depending on context - this is why
+       `software_monitors_vital_parameters_with_immediate_danger_potential`
+       is modelled as a separate flag rather than inferred purely from
+       what is being monitored.
+    2. Software driving a physical device is scoped OUT of Rule 11
+       entirely by Annex VIII Chapter II, point 3.3 ("Software, which
+       drives a device or influences the use of a device, shall fall
+       within the same class as the device") - MDCG's Note 3 restates
+       this. **This engine does not yet implement 3.3**: `Rule11` always
+       evaluates standalone-software criteria regardless of whether the
+       software drives another device. A firmware/embedded-software
+       device attached to, say, a Class IIb infusion pump should inherit
+       IIb via 3.3, not be re-derived from Rule 11's decision/monitoring
+       criteria. Flagged as a known gap - see docs/CLARIFICATIONS_RULE_11.md.
     """
 
     rule_id = "Rule 11"
@@ -783,13 +852,17 @@ class Rule11(ClassificationRule):
             ambiguous=severity_flagged,
             ambiguous_note=(
                 "Classifying decision-support software by the severity of harm "
-                "its output *could* cause ('serious deterioration', 'surgical "
-                "intervention', 'irreversible deterioration') is one of the most "
-                "contested areas of MDR classification in practice (see MDCG "
-                "2019-11 guidance on qualification/classification of software). "
-                "This is a genuine clinical-judgement call, not a mechanical "
-                "one; a notified body may reach a different severity tier than "
-                "the input attributes assume."
+                "its output *could* cause is confirmed by MDCG 2021-24's own "
+                "Note 2 to be context-dependent - the same software can shift "
+                "class based on intended population, clinical setting (home vs. "
+                "ICU/emergency), and the decisions actually being informed, not "
+                "just its function in isolation. Real examples from MDCG "
+                "2021-24 (pp. 46-47): image-analysis stroke diagnosis software "
+                "-> III; a heartbeat-arrhythmia-detection app -> IIb; a "
+                "chemotherapy-option ranking tool for clinicians -> IIa. "
+                "Assigning the correct tier from a free-text description is a "
+                "genuine judgement call for Phase 2's extractor; see "
+                "docs/CLARIFICATIONS_RULE_11.md."
                 if severity_flagged
                 else None
             ),
