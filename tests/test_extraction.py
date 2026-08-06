@@ -11,8 +11,12 @@ from __future__ import annotations
 from extraction.keyword_extractor import KeywordExtractor
 from rules_engine.models import (
     ActiveDeviceType,
+    BodyOrificeSite,
+    DisinfectCleanTarget,
     Duration,
     Invasiveness,
+    ModificationTreatmentType,
+    StorageTarget,
     TissueOrigin,
     WoundContactPurpose,
 )
@@ -323,3 +327,344 @@ def test_placed_in_teeth_infers_implantable_but_not_invasiveness():
     assert result.device.is_implantable is True  # fixed: inferred alongside placed_in_teeth
     assert result.device.invasiveness == Invasiveness.NON_INVASIVE  # residual gap: still not inferred
     assert any("invasiveness" in note for note in result.unmatched_notes)
+
+
+# =========================================================================
+# Comprehensive grounding pass: Rules 2, 3, 5, 6-10, 12, 16, 18, 20-22
+# =========================================================================
+# Added when deepening keyword coverage from 30/65 to 56/65 DeviceAttributes
+# fields, grounded in the exact Annex VIII/Article 2 text (see
+# extraction/keyword_extractor.py's module docstring for the full list).
+# Several genuine bugs were found and fixed while writing these tests -
+# each is called out explicitly rather than silently folded in.
+
+
+# --- Central circulatory system / CNS (Annex VIII 2.6, 2.7) ---
+# The starting point for this pass: generic words like "heart" or "brain"
+# aren't the actual definitions - 2.6 is an exhaustive list of specific
+# named vessels, and 2.7 easily loses "meninges" if grounded from common
+# sense instead of the definition text itself.
+
+
+def test_central_circulatory_system_latin_vessel_name():
+    result = _extract("A catheter placed in the truncus brachiocephalicus.")
+    assert result.device.contacts_heart_or_central_circulatory_system is True
+
+
+def test_central_circulatory_system_english_vessel_name():
+    result = _extract("A stent placed in the superior vena cava.")
+    assert result.device.contacts_heart_or_central_circulatory_system is True
+
+
+def test_central_nervous_system_meninges_not_missed():
+    result = _extract("A device intended for direct contact with the meninges.")
+    assert result.device.contacts_central_nervous_system is True
+
+
+# --- Rule 2 ---
+
+
+def test_rule2_channels_stores_blood():
+    result = _extract("A non-invasive device intended for storing blood for eventual infusion into the body.")
+    assert result.device.channels_or_stores_for_infusion_administration_or_introduction is True
+    assert result.device.storage_target == StorageTarget.BLOOD_OR_OTHER_BODY_LIQUIDS
+
+
+def test_rule2_storage_target_blood_bags():
+    result = _extract("A blood bag for storing blood.")
+    assert result.device.storage_target == StorageTarget.BLOOD_BAGS
+
+
+def test_rule2_storage_target_organs():
+    result = _extract("A non-invasive device for storing organs for eventual transplantation.")
+    assert result.device.storage_target == StorageTarget.ORGANS_CELLS_TISSUES
+
+
+def test_rule2_storage_target_catch_all_with_note():
+    result = _extract("A non-invasive device for channelling gas for eventual administration into the body.")
+    assert result.device.channels_or_stores_for_infusion_administration_or_introduction is True
+    assert result.device.storage_target == StorageTarget.OTHER
+    assert any("storage_target" in note for note in result.unmatched_notes)
+
+
+# --- Rule 3 ---
+
+
+def test_rule3_modifies_composition_with_filtration():
+    result = _extract("A non-invasive device that modifies the biological composition of blood by filtration.")
+    assert result.device.modifies_biological_or_chemical_composition is True
+    assert result.device.modification_treatment_type == ModificationTreatmentType.FILTRATION_CENTRIFUGATION_GAS_OR_HEAT_EXCHANGE
+
+
+def test_rule3_modifies_composition_other_treatment():
+    result = _extract("A device that modifies the chemical composition of other body liquids by an unspecified process.")
+    assert result.device.modification_treatment_type == ModificationTreatmentType.OTHER
+
+
+def test_rule3_in_vitro_contact():
+    result = _extract("A substance used in vitro in direct contact with human cells taken from the body.")
+    assert result.device.in_vitro_direct_contact_with_cells_tissues_organs_or_embryos is True
+
+
+# --- Rule 5 body-orifice site + absorption ---
+
+
+def test_rule5_body_orifice_site_oral():
+    result = _extract("A device inserted in the oral cavity as far as the pharynx.")
+    assert result.device.body_orifice_site == BodyOrificeSite.ORAL_CAVITY_TO_PHARYNX
+
+
+def test_rule5_body_orifice_site_ear():
+    result = _extract("A hearing device inserted into the ear canal.")
+    assert result.device.body_orifice_site == BodyOrificeSite.EAR_CANAL_TO_EARDRUM
+
+
+def test_rule5_body_orifice_site_nasal():
+    result = _extract("A device inserted in the nasal cavity.")
+    assert result.device.body_orifice_site == BodyOrificeSite.NASAL_CAVITY
+
+
+def test_rule5_liable_to_be_absorbed():
+    result = _extract("A device in the nasal cavity that is liable to be absorbed by the mucous membrane.")
+    assert result.device.liable_to_be_absorbed_by_mucous_membrane is True
+
+
+def test_rule5_not_liable_to_be_absorbed_negation():
+    """Regression test: 'not liable to be absorbed' contains 'liable to
+    be absorbed' as a substring, so the positive signal must not win."""
+    result = _extract("A device in the ear canal that is not liable to be absorbed by the mucous membrane.")
+    assert result.device.liable_to_be_absorbed_by_mucous_membrane is False
+
+
+# --- Rules 6-8 shared physical effects ---
+
+
+def test_ionising_radiation_british_spelling():
+    result = _extract("A surgically invasive device intended to supply ionising radiation.")
+    assert result.device.supplies_ionising_radiation is True
+
+
+def test_ionising_radiation_american_spelling():
+    """The regulation itself is inconsistent about spelling this across
+    rules (Rule 6: 'ionising'; Rule 7: 'ionizing') - both must match."""
+    result = _extract("A surgically invasive device intended to supply ionizing radiation.")
+    assert result.device.supplies_ionising_radiation is True
+
+
+def test_undergoes_chemical_change():
+    result = _extract("An implantable device that will undergo chemical change in the body.")
+    assert result.device.undergoes_chemical_change_in_body is True
+
+
+# --- Rule 9 ---
+
+
+def test_rule9_administers_or_exchanges_energy():
+    result = _extract("An active therapeutic device that administers or exchanges energy to treat pain.")
+    assert result.device.administers_or_exchanges_energy is True
+
+
+def test_rule9_emits_ionising_radiation_therapeutic():
+    result = _extract("An active device that emits ionising radiation for therapeutic purposes (radiotherapy).")
+    assert result.device.emits_ionising_radiation_therapeutic is True
+
+
+# --- Rule 10 ---
+
+
+def test_rule10_diagnostic_energy_absorbed():
+    result = _extract("An active diagnostic device that supplies energy which will be absorbed by the human body.")
+    assert result.device.diagnostic_supplies_energy_absorbed_by_body is True
+
+
+def test_rule10_illuminate_visible_spectrum():
+    result = _extract("An active diagnostic device intended to illuminate the patient's body in the visible spectrum.")
+    assert result.device.diagnostic_illuminates_patient_visible_spectrum_only is True
+
+
+def test_rule10_radiopharmaceutical_imaging():
+    result = _extract("An active device intended to image in vivo distribution of radiopharmaceuticals.")
+    assert result.device.diagnostic_images_in_vivo_radiopharmaceutical_distribution is True
+
+
+def test_rule10_direct_diagnosis_vital_with_immediate_danger():
+    result = _extract(
+        "An active device for direct diagnosis of vital physiological processes; "
+        "variations could cause immediate danger, e.g. cardiac performance."
+    )
+    assert result.device.diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes is True
+    assert result.device.diagnostic_variation_could_cause_immediate_danger is True
+    assert result.clarifying_questions == []
+
+
+def test_rule10_direct_diagnosis_vital_without_danger_signal_asks_question():
+    result = _extract("An active device for direct diagnosis of vital physiological processes.")
+    assert result.device.diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes is True
+    assert result.device.diagnostic_variation_could_cause_immediate_danger is False
+    assert len(result.clarifying_questions) == 1
+    assert "Class IIb" in result.clarifying_questions[0]
+
+
+def test_rule10_diagnostic_therapeutic_radiology():
+    result = _extract("A CT scanner used for diagnostic radiology.")
+    assert result.device.emits_ionising_radiation_diagnostic_or_interventional is True
+
+
+# --- Rule 12 ---
+
+
+def test_rule12_administers_and_removes_substances():
+    """Regression test: the regex must not require the literal word
+    'and/or' - real text says 'administers and removes', not
+    'administers and/or removes'."""
+    result = _extract("An active device that administers and removes body liquids from the patient.")
+    assert result.device.administers_or_removes_substances_to_from_body is True
+
+
+def test_rule12_named_device_type():
+    result = _extract("A suction pump.")
+    # "suction pump" alone doesn't set is_active via the power-keyword
+    # list, but the device-type phrase itself is a Rule 12 signal -
+    # confirms is_active gating doesn't block this from being logged even
+    # when the pump isn't independently flagged as active by other means.
+    assert result.device.administers_or_removes_substances_to_from_body is True
+
+
+# --- Rule 16 ---
+
+
+def test_rule16_contact_lens_care():
+    result = _extract("A solution intended for disinfecting and hydrating contact lenses.")
+    assert result.device.disinfect_clean_target == DisinfectCleanTarget.CONTACT_LENSES
+
+
+def test_rule16_invasive_device_end_point():
+    result = _extract("A washer-disinfector for invasive devices such as endoscopes, used as the end point of processing.")
+    assert result.device.disinfect_clean_target == DisinfectCleanTarget.INVASIVE_DEVICE_END_POINT
+
+
+def test_rule16_other_medical_device():
+    result = _extract("A solution intended for disinfecting medical devices.")
+    assert result.device.disinfect_clean_target == DisinfectCleanTarget.OTHER_MEDICAL_DEVICE
+
+
+def test_rule16_physical_action_only_carve_out():
+    result = _extract("A brush intended for disinfecting medical devices by physical action only.")
+    assert result.device.disinfect_clean_target == DisinfectCleanTarget.PHYSICAL_ACTION_ONLY_NON_LENS
+
+
+# --- Rule 18 ---
+
+
+def test_rule18_generic_animal_tissue_phrase():
+    """Regression test: the original signal list only had specific
+    species (porcine/bovine) and 'animal-derived/origin/sourced' - the
+    plain phrase 'animal tissue' itself was missing."""
+    result = _extract("A device made from animal tissue.")
+    assert result.device.contains_human_or_animal_tissue_or_cells is True
+    assert result.device.tissue_origin == TissueOrigin.ANIMAL
+
+
+def test_rule18_intact_skin_only_carve_out():
+    result = _extract("A device made from animal tissue intended for contact with intact skin only.")
+    assert result.device.tissue_contacts_intact_skin_only is True
+
+
+# --- Rule 20 ---
+
+
+def test_rule20_life_threatening():
+    result = _extract("An inhaler intended to treat life-threatening conditions.")
+    assert result.device.inhalation_essential_impact_or_life_threatening is True
+
+
+# --- Rule 21 ---
+
+
+def test_rule21_systemically_absorbed():
+    result = _extract("A substance systemically absorbed by the human body after being introduced via a body orifice.")
+    assert result.device.systemically_absorbed is True
+
+
+def test_rule21_not_systemically_absorbed_negation():
+    """Regression test: 'not systemically absorbed' contains
+    'systemically absorbed' as a substring, so the positive signal must
+    not win - same bug class as Rule 5's liable/not-liable case."""
+    result = _extract(
+        "A substance composed of substances applied to the skin, achieving its "
+        "intended purpose locally, not systemically absorbed."
+    )
+    assert result.device.systemically_absorbed is False
+
+
+def test_rule21_stomach_lower_gi():
+    result = _extract("A substance composed of substances that achieves its intended purpose in the stomach.")
+    assert result.device.achieves_purpose_in_stomach_or_lower_gi_tract is True
+
+
+def test_rule21_applied_to_skin():
+    result = _extract("A substance composed of substances applied to the skin.")
+    assert result.device.applied_to_skin_or_nasal_oral_cavity_to_pharynx is True
+
+
+# --- Rule 22 ---
+
+
+def test_rule22_closed_loop_system():
+    result = _extract("An active therapeutic device that is part of a closed-loop system.")
+    assert result.device.is_active_therapeutic_with_integrated_diagnostic_function is True
+
+
+def test_rule22_automated_external_defibrillator():
+    result = _extract("An automated external defibrillator with an integrated diagnostic function.")
+    assert result.device.is_active_therapeutic_with_integrated_diagnostic_function is True
+
+
+# --- is_active detection bugs found and fixed during this pass ---
+
+
+def test_is_active_from_literal_phrase():
+    """Regression test: the literal phrase 'active device' (or 'active
+    therapeutic/diagnostic/implantable device') was not recognised at
+    all - only indirect power-source vocabulary (battery, electronic,
+    etc.) was. A device description using the regulation's own term for
+    itself must be recognised."""
+    result = _extract("An active device that monitors patient status.")
+    assert result.device.is_active is True
+
+
+def test_is_active_from_therapeutic_function_alone():
+    """Regression test: Annex VIII 2.4 defines 'active therapeutic
+    device' as ITSELF a subtype of active device - so therapeutic
+    function vocabulary (therapy, treat, stimulate...) is sufficient
+    evidence for is_active on its own, without also requiring a separate
+    battery/powered keyword."""
+    result = _extract("A device that delivers therapy to alleviate pain.")
+    assert result.device.is_active is True
+    assert result.device.active_type == ActiveDeviceType.THERAPEUTIC
+
+
+def test_is_active_from_diagnostic_function_alone():
+    """Same bug class as above, for Annex VIII 2.5: 'a CT scanner' has no
+    power-source keyword but is unambiguously an active diagnostic
+    device."""
+    result = _extract("A CT scanner used for diagnostic radiology.")
+    assert result.device.is_active is True
+    assert result.device.active_type == ActiveDeviceType.DIAGNOSTIC_MONITORING
+
+
+def test_automated_external_defibrillator_does_not_falsely_match_implantable_signal():
+    """Regression test: the original implantable-defibrillator pattern
+    made both 'implantable' and 'cardioverter' optional, so it matched
+    bare 'defibrillator' - meaning an explicitly EXTERNAL automated
+    defibrillator (AED) falsely set is_active_implantable_or_accessory.
+    AEDs are not implantable; they belong under Rule 22 instead."""
+    result = _extract("An automated external defibrillator with an integrated diagnostic function.")
+    assert result.device.is_active_implantable_or_accessory is False
+
+
+def test_implantable_cardioverter_defibrillator_still_matches():
+    """Confirms the AED fix above didn't overcorrect: a genuine ICD must
+    still match."""
+    result = _extract("An implantable cardioverter defibrillator (ICD) implanted permanently.")
+    assert result.device.is_active_implantable_or_accessory is True

@@ -46,42 +46,51 @@ judgement.
   its input.
 - `extraction/keyword_extractor.py` - `KeywordExtractor`, the **default**
   extractor per the project brief (keyword/rule-based is the lead path,
-  not a fallback for an LLM). Deliberately bounded scope: it targets the
-  ~35 `DeviceAttributes` fields most reliably signalled by short
-  descriptions, and explicitly leaves the rest at their defaults rather
-  than guess - most notably Rule 11's software severity tiering, which
-  MDCG's own guidance says requires clinical judgement no keyword list
-  should approximate (see `docs/CLARIFICATIONS_RULE_11.md`). See that
-  module's docstring for the full documented coverage and known limits.
+  not a fallback for an LLM). Covers **56 of 65** `DeviceAttributes`
+  fields (86%), each grounded in the exact Article 2 / Annex VIII
+  provision it implements - not invented synonyms. The remaining 9 are
+  left uncovered on purpose, in two honest categories: fields that
+  describe a relationship to a *second* device this extractor has no
+  knowledge of (e.g. `drives_or_influences_device_class`), and genuine
+  "potentially hazardous" / technical-assessment judgement calls MDCG's
+  own guidance says can't be reduced to a checklist (e.g.
+  `is_ancillary_component`, `nanomaterial_internal_exposure_potential` -
+  see `docs/CLARIFICATIONS_RULE_8.md` and `docs/CLARIFICATIONS_RULE_11.md`).
+  See the module's own docstring for the itemised list.
 - `cli.py --text "..."` - runs a description through the extractor, then
   the same engine as the structured-input path, printing both the
   matched signals (why it concluded what it did) and anything it could
   not determine.
-- Two real bugs were found and fixed by this extractor's own test suite
-  before commit: an `\belectrical` regex that missed plain "electric",
-  and a dental-filling case where `placed_in_teeth` alone had no effect
-  because Rule 8's gate never fired - both documented in
-  `tests/test_extraction.py` alongside the fix.
 - **Full transparency by default**: `cli.py`'s human-readable report
   shows the status of all 22 rules, not just the deciding one - a Class
   I result visibly means "we checked everything and only Rule 1's
   default applied," not a silent absence of information.
 - **Clarifying questions, not just warnings, for genuine judgement
   calls**: when the extractor detects decision-support or monitoring
-  *function* in software but can't determine severity/context from text
-  alone, it never lets that fall into Rule 11's "all other software"
-  bucket by omission - it sets the conservative floor the detected
-  function actually supports and asks the specific question (with each
-  answer's consequence named) needed to finish the job, e.g. "what's the
-  worst realistic consequence if this software's output is wrong -
-  routine, serious deterioration/surgery, or death/irreversible harm?"
-  See `ExtractionResult.clarifying_questions`.
-- Invasiveness/duration keyword lists are grounded directly in the
-  regulation's own defining vocabulary rather than invented synonyms -
-  e.g. Annex VIII 2.3 defines "reusable surgical instrument" via the
-  verbs "cutting, drilling, sawing, scratching, scraping, clamping,
-  retracting, clipping," which are now literal signals, not just nouns
-  like "scalpel."
+  *function* in software (or vital-parameter danger context) but can't
+  determine severity from text alone, it never lets that fall into Rule
+  11's "all other software" bucket by omission - it sets the
+  conservative floor the detected function actually supports and asks
+  the specific question (with each answer's consequence named) needed to
+  finish the job. See `ExtractionResult.clarifying_questions`.
+- Keyword lists are grounded directly in the regulation's own defining
+  vocabulary rather than invented synonyms wherever a definition exists -
+  e.g. Annex VIII 2.6 gives an exhaustive, exact list of named blood
+  vessels for "central circulatory system" (not just "heart"), and 2.3
+  defines "reusable surgical instrument" via the verbs "cutting,
+  drilling, sawing, scratching, scraping, clamping, retracting,
+  clipping," which are now literal signals, not just nouns like
+  "scalpel."
+- Real bugs found and fixed by this extractor's own test suite before
+  commit (documented alongside their fixes in `tests/test_extraction.py`):
+  an `\belectrical` regex that missed plain "electric"; a dental-filling
+  case where `placed_in_teeth` alone had no effect because Rule 8's gate
+  never fired; literal "active device" phrasing not being recognised at
+  all (only indirect power-source words were); an automated *external*
+  defibrillator (AED) falsely matching the *implantable* cardioverter
+  defibrillator signal; and two negation bugs where "not liable to be
+  absorbed" / "not systemically absorbed" matched their own positive
+  signal because the negated phrase contains it as a substring.
 
 **Not yet built**: standards mapping (`standards_mapper/`) and the
 Streamlit UI (`ui/`). Their package directories exist as placeholders
@@ -173,7 +182,7 @@ published industry classification figure, and explains why.
 
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
 cases, and both `rules_engine/eu_mdr/rules.py` and
-`extraction/keyword_extractor.py` sit at 100% statement coverage (200
+`extraction/keyword_extractor.py` sit at 100% statement coverage (256
 tests total) - see `docs/legal_sources/` for the retrieved source
 excerpts behind every citation in this codebase.
 

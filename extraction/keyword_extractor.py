@@ -22,39 +22,79 @@ source text.
 
 ## Coverage
 
-This extractor targets a deliberately bounded, documented subset of
-``rules_engine.models.DeviceAttributes`` - the fields most reliably
-signalled by short free-text device descriptions. It does NOT attempt
-every field on the model. Covered:
+56 of the 65 non-metadata fields on ``rules_engine.models.DeviceAttributes``
+are attempted (86%) - grounded, per-rule, in the exact provisions listed
+below. Verify this figure yourself rather than trust the count: it was
+produced by scanning this file for every ``apply_bool(...)`` call and
+``device.<field> = ...`` assignment and diffing against
+``dataclasses.fields(DeviceAttributes)``, not by hand-counting.
 
-- invasiveness, duration, is_implantable, is_active, active_type,
-  is_software (including decision-support/monitoring *function*
-  detection - see "Software" below), drives_or_influences_device_class
-  (never inferred - always left None; genuinely requires knowing about
-  a separate device)
-- placed_on_market_sterile, has_measuring_function,
-  is_reusable_surgical_instrument
-- contacts_heart_or_central_circulatory_system,
-  contacts_central_nervous_system, placed_in_teeth,
-  is_joint_replacement, is_spinal_disc_replacement_or_contacts_spinal_column,
-  is_breast_implant_or_surgical_mesh, is_active_implantable_or_accessory
-- has_biological_effect_or_wholly_mainly_absorbed,
-  administers_medicinal_product, contains_ancillary_medicinal_substance
-- contacts_injured_skin_or_mucous_membrane, wound_contact_purpose
-- is_contraceptive_or_sti_prevention,
-  is_xray_diagnostic_image_recording_device,
-  contains_human_or_animal_tissue_or_cells, tissue_origin,
-  contains_nanomaterial, administers_medicinal_product_by_inhalation
+- **Chapter I definitions** (Article 2(4)-(8); Annex VIII 2.1-2.8):
+  invasiveness, duration, is_implantable, is_active, active_type,
+  is_software, contacts_heart_or_central_circulatory_system (full
+  Annex VIII 2.6 vessel list, not just "heart"), contacts_central_nervous_system
+  (including "meninges," easy to miss vs. brain/spinal cord)
+- **Rule 2**: channels_or_stores_for_infusion_administration_or_introduction,
+  storage_target
+- **Rule 3**: modifies_biological_or_chemical_composition,
+  modification_treatment_type,
+  in_vitro_direct_contact_with_cells_tissues_organs_or_embryos
+- **Rule 4**: contacts_injured_skin_or_mucous_membrane, wound_contact_purpose
+- **Rule 5**: body_orifice_site, liable_to_be_absorbed_by_mucous_membrane
+  (including the negated "not liable to be absorbed" case)
+- **Rules 6-8**: supplies_ionising_radiation, undergoes_chemical_change_in_body,
+  placed_in_teeth, is_joint_replacement,
+  is_spinal_disc_replacement_or_contacts_spinal_column,
+  is_breast_implant_or_surgical_mesh, is_active_implantable_or_accessory,
+  has_biological_effect_or_wholly_mainly_absorbed, administers_medicinal_product
+- **Rule 9**: administers_or_exchanges_energy, emits_ionising_radiation_therapeutic
+- **Rule 10**: diagnostic_supplies_energy_absorbed_by_body,
+  diagnostic_illuminates_patient_visible_spectrum_only,
+  diagnostic_images_in_vivo_radiopharmaceutical_distribution,
+  diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes,
+  diagnostic_variation_could_cause_immediate_danger,
+  emits_ionising_radiation_diagnostic_or_interventional
+- **Rule 11** (software): decision-support/monitoring *function* detection -
+  see "Software" below
+- **Rule 12**: administers_or_removes_substances_to_from_body
+- **Rule 14**: contains_ancillary_medicinal_substance
+- **Rule 15**: is_contraceptive_or_sti_prevention
+- **Rule 16**: disinfect_clean_target (all four values: contact lenses,
+  other medical device, invasive-device end-point, physical-action-only
+  carve-out)
+- **Rule 17**: is_xray_diagnostic_image_recording_device
+- **Rule 18**: contains_human_or_animal_tissue_or_cells, tissue_origin,
+  tissue_contacts_intact_skin_only
+- **Rule 19**: contains_nanomaterial (gate only - see NOT covered)
+- **Rule 20**: administers_medicinal_product_by_inhalation,
+  inhalation_essential_impact_or_life_threatening
+- **Rule 21**: composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin,
+  systemically_absorbed (including the negated "not systemically
+  absorbed" case), achieves_purpose_in_stomach_or_lower_gi_tract,
+  applied_to_skin_or_nasal_oral_cavity_to_pharynx
+- **Rule 22**: is_active_therapeutic_with_integrated_diagnostic_function
 
-NOT covered (left at DeviceAttributes defaults - see that module for the
-full field list): the Rule 2/3 non-invasive channelling/modification
-detail (storage_target, modification_treatment_type), Rule 5's body-
-orifice-site/absorption nuances, Rule 9/10's fine-grained active-device
-energy/diagnostic sub-conditions, Rule 16's disinfection-target detail,
-Rule 19's nanomaterial exposure tier, Rule 20/21's hazard/absorption-
-site nuances, and the ancillary-component / ancillary-medicinal-
-substance-vs-primary-action distinctions that MDCG itself says need
-case-by-case judgement (see docs/CLARIFICATIONS_RULE_8.md).
+**NOT covered** (left at DeviceAttributes defaults) - 9 fields, split into
+two honest categories rather than one vague "not implemented":
+
+1. **Relational fields that cannot be inferred from a single device's own
+   description**, full stop - they describe a relationship to a *second*
+   device this extractor has no knowledge of: drives_or_influences_device_class,
+   connected_to_active_device_class,
+   controls_monitors_or_influences_therapeutic_class_iib_device,
+   controls_monitors_or_influences_active_implantable_device.
+2. **Genuine judgement calls the regulation itself does not reduce to a
+   checklist**, matching this project's established policy (see
+   docs/CLARIFICATIONS_RULE_8.md, docs/CLARIFICATIONS_RULE_11.md) of not
+   forcing false confidence: administration_potentially_hazardous (Rule 6),
+   energy_exchange_potentially_hazardous (Rule 9),
+   administration_or_removal_potentially_hazardous (Rule 12) - "potentially
+   hazardous" is inherently a risk-assessment judgement, not a textual
+   fact; nanomaterial_internal_exposure_potential (Rule 19) - the
+   negligible/low/medium/high tiers come from a SCENIHR-style technical
+   exposure assessment methodology, not simple keyword matching;
+   is_ancillary_component (Rule 8) - MDCG's own Note 1 says there is no
+   blanket rule for this.
 
 ## Software: function is detected, severity is asked about
 
@@ -101,10 +141,14 @@ from dataclasses import dataclass
 from extraction.base import Extractor, ExtractionResult
 from rules_engine.models import (
     ActiveDeviceType,
+    BodyOrificeSite,
     DeviceAttributes,
+    DisinfectCleanTarget,
     Duration,
     Invasiveness,
+    ModificationTreatmentType,
     SoftwareDecisionImpact,
+    StorageTarget,
     TissueOrigin,
     WoundContactPurpose,
 )
@@ -207,6 +251,73 @@ _NON_INVASIVE_SIGNALS = [
     _Signal(r"\bskin surface|\bworn on the skin|\bapplied to (?:the )?skin", "applied to / worn on the skin"),
 ]
 
+# --- Rule 5 body-orifice site detail ---
+# Rule 5 (Annex VIII 5.1): the oral cavity/ear canal/nasal cavity
+# exemptions are pinned to exact anatomical phrasing ("oral cavity as far
+# as the pharynx," "ear canal up to the ear drum," "nasal cavity"). An
+# earlier version of this extractor detected these phrases well enough
+# to classify invasiveness but never populated body_orifice_site itself
+# - meaning Rule 5's exemptions could never actually fire from extracted
+# text even when the description clearly named one of the three sites.
+_ORIFICE_SITE_ORAL_SIGNALS = [
+    _Signal(r"\boral cavity\b", "oral cavity (Rule 5 wording: 'oral cavity as far as the pharynx')"),
+    _Signal(r"\bpharynx\b", "pharynx (Rule 5 wording)"),
+]
+_ORIFICE_SITE_EAR_SIGNALS = [
+    _Signal(r"\bear canal\b", "ear canal (Rule 5 wording: 'ear canal up to the ear drum')"),
+    _Signal(r"\bear ?drum\b|\btympanic membrane\b", "ear drum / tympanic membrane (Rule 5 wording)"),
+]
+_ORIFICE_SITE_NASAL_SIGNALS = [
+    _Signal(r"\bnasal cavity\b", "nasal cavity (Rule 5 wording)"),
+]
+_LIABLE_TO_BE_ABSORBED_SIGNALS = [
+    _Signal(r"\bliable to be absorbed\b", "liable to be absorbed by the mucous membrane (Rule 5 wording)"),
+]
+_NOT_LIABLE_TO_BE_ABSORBED_SIGNALS = [
+    _Signal(r"\bnot liable to be absorbed\b", "explicitly 'not liable to be absorbed' (Rule 5 wording)"),
+]
+
+# =========================================================================
+# Non-invasive rule detail (Rules 2-3)
+# =========================================================================
+# Rule 2 (Annex VIII 4.2): "channelling or storing blood, body liquids,
+# cells or tissues, liquids or gases for the purpose of eventual
+# infusion, administration or introduction into the body."
+_CHANNELS_STORES_SIGNALS = [
+    _Signal(r"\bblood bag", "blood bag (Rule 2 wording)"),
+    _Signal(r"\bchannel(?:s|ling|ing)?\b.{0,50}(?:blood|body liquid|liquid|gas|infusion)", "channels blood/liquid/gas (Rule 2 wording)"),
+    _Signal(r"\bstor(?:e|es|ing)\b.{0,50}(?:blood|body liquid|organ|tissue|cell|for infusion)", "stores blood/liquid/organ/tissue/cell (Rule 2 wording)"),
+    _Signal(r"\beventual infusion\b", "eventual infusion (Rule 2 wording)"),
+]
+_STORAGE_BLOOD_BAG_SIGNALS = [_Signal(r"\bblood bag", "blood bag (Rule 2 wording)")]
+_STORAGE_ORGAN_TISSUE_SIGNALS = [
+    _Signal(r"\borgan(?:s)?\b", "organ(s) (Rule 2 wording)"),
+    _Signal(r"\bbody cells and tissues\b|\bparts of organs\b", "body cells and tissues / parts of organs (Rule 2 wording)"),
+]
+_STORAGE_BLOOD_LIQUID_SIGNALS = [
+    _Signal(r"\bblood\b", "blood (Rule 2 wording)"),
+    _Signal(r"\bbody liquid(?:s)?\b", "body liquid(s) (Rule 2 wording)"),
+]
+
+# Rule 3 (Annex VIII 4.3): "modifying the biological or chemical
+# composition of human tissues or cells, blood, other body liquids...";
+# treatment types "filtration, centrifugation or exchanges of gas,
+# heat"; and separately, substances "used in vitro in direct contact
+# with human cells, tissues or organs...or...with human embryos."
+_MODIFIES_COMPOSITION_SIGNALS = [
+    _Signal(r"\bmodif(?:y|ies|ying)\b.{0,50}(?:biological|chemical) composition", "modifies biological/chemical composition (Rule 3 wording)"),
+]
+_MODIFICATION_FILTRATION_SIGNALS = [
+    _Signal(r"\bfiltration\b", "filtration (Rule 3 wording)"),
+    _Signal(r"\bcentrifugation\b", "centrifugation (Rule 3 wording)"),
+    _Signal(r"\b(?:exchange(?:s)? of|exchanging) gas\b|\bgas exchange\b", "gas exchange (Rule 3 wording)"),
+    _Signal(r"\bheat exchange\b", "heat exchange (Rule 3 wording)"),
+]
+_IN_VITRO_SIGNALS = [
+    _Signal(r"\bin vitro\b", "in vitro (Rule 3 wording)"),
+    _Signal(r"\bhuman embryos\b", "human embryos (Rule 3 wording)"),
+]
+
 # =========================================================================
 # Duration (Annex VIII Chapter I, Section 1; Article 2(8) single-use device)
 # =========================================================================
@@ -251,6 +362,13 @@ _IMPLANTABLE_SIGNALS = [
     _Signal(r"\bclinical intervention\b.{0,40}\bremain(?:s)? in place\b|\bremain(?:s)? in place\b.{0,40}\bclinical intervention\b", "clinical intervention + remains in place (Article 2(5) wording)"),
 ]
 _ACTIVE_SIGNALS = [
+    # Article 2(4): "'active device' means any device, the operation of
+    # which depends on a source of energy other than that generated by
+    # the human body...or by gravity." The literal phrase "active device"
+    # (or "active therapeutic/diagnostic/implantable device") is common
+    # in real descriptions and must be matched directly, not just
+    # inferred from power-source vocabulary.
+    _Signal(r"\bactive (?:therapeutic |diagnostic |implantable |monitoring )?device\b", "explicitly 'active device' (Article 2(4) wording)"),
     _Signal(r"\bbattery|\bbatteries\b", "battery-powered"),
     _Signal(r"\bpowered\b", "powered"),
     _Signal(r"\belectronic", "electronic"),
@@ -258,6 +376,11 @@ _ACTIVE_SIGNALS = [
     _Signal(r"\brechargeable", "rechargeable"),
     _Signal(r"\benergy source", "energy source"),
     _Signal(r"\bmotor(?:ised|ized)?\b", "motor(ised)"),
+    # Named Rule 12 device types are inherently active (a suction/
+    # infusion/feeding pump or dialysis machine requires a power source
+    # to function) even when a description doesn't separately say
+    # "active," "powered," etc.
+    _Signal(r"\binfusion pump\b|\bfeeding pump\b|\bsuction pump\b|\bdialysis\b", "named active device type (infusion/feeding/suction pump, dialysis)"),
 ]
 _ACTIVE_THERAPEUTIC_SIGNALS = [
     # Annex VIII 2.4: "'Active therapeutic device' means any active
@@ -282,7 +405,7 @@ _ACTIVE_DIAGNOSTIC_SIGNALS = [
     _Signal(r"\bmeasur", "measur(e/es/ing)"),
     _Signal(r"\bdetect(?:s|ion)?\b", "detect(s/ion)"),
     _Signal(r"\bsens(?:e|ing|or)\b", "sense/sensing/sensor"),
-    _Signal(r"\bimaging\b|\bscanner\b", "imaging/scanner"),
+    _Signal(r"\bimag(?:e|es|ing|ed)\b|\bscanner\b", "image(s)/imaging/scanner"),
 ]
 _SOFTWARE_SIGNALS = [
     _Signal(r"\bsoftware\b", "software"),
@@ -342,13 +465,47 @@ _REUSABLE_INSTRUMENT_SIGNALS = [
 # =========================================================================
 # Critical anatomy contact (Rules 6-8)
 # =========================================================================
+# Annex VIII 2.6: "'Central circulatory system' means the following
+# blood vessels: arteriae pulmonales, aorta ascendens, arcus aortae,
+# aorta descendens to the bifurcatio aortae, arteriae coronariae, arteria
+# carotis communis, arteria carotis externa, arteria carotis interna,
+# arteriae cerebrales, truncus brachiocephalicus, venae cordis, venae
+# pulmonales, vena cava superior and vena cava inferior." This is an
+# exhaustive, closed list, not "any blood vessel near the heart" - it is
+# also the exact boundary between Class IIb and Class III in Rules 6-8,
+# so both the Latin terms a clinical/technical description might use and
+# their common English equivalents are matched.
 _HEART_CIRC_SIGNALS = [
-    _Signal(r"\bheart\b|\bcardiac\b|\bcoronary\b", "heart/cardiac/coronary"),
-    _Signal(r"\baorta\b|\bcirculatory system\b|\bvena cava\b|\bpulmonary artery\b", "central circulatory system"),
+    _Signal(r"\bheart\b|\bcardiac\b", "heart/cardiac (direct contact context, not the specific vessel list)"),
+    _Signal(r"\barteriae pulmonales\b|\bpulmonary arter(?:y|ies)\b", "pulmonary artery/arteries (Annex VIII 2.6: arteriae pulmonales)"),
+    _Signal(r"\baorta ascendens\b|\bascending aorta\b", "ascending aorta (Annex VIII 2.6: aorta ascendens)"),
+    _Signal(r"\barcus aortae\b|\baortic arch\b", "aortic arch (Annex VIII 2.6: arcus aortae)"),
+    _Signal(r"\baorta descendens\b|\bdescending aorta\b", "descending aorta (Annex VIII 2.6: aorta descendens)"),
+    _Signal(r"\bbifurcatio aortae\b|\baortic bifurcation\b", "aortic bifurcation (Annex VIII 2.6: bifurcatio aortae)"),
+    _Signal(r"\baorta\b", "aorta (generic - Annex VIII 2.6 covers the aorta from aorta ascendens to the bifurcatio aortae)"),
+    _Signal(r"\barteriae coronariae\b|\bcoronary arter(?:y|ies)\b|\bcoronary\b", "coronary artery/arteries (Annex VIII 2.6: arteriae coronariae)"),
+    _Signal(r"\barteria carotis communis\b|\bcommon carotid\b", "common carotid artery (Annex VIII 2.6: arteria carotis communis)"),
+    _Signal(r"\barteria carotis externa\b|\bexternal carotid\b", "external carotid artery (Annex VIII 2.6: arteria carotis externa)"),
+    _Signal(r"\barteria carotis interna\b|\binternal carotid\b", "internal carotid artery (Annex VIII 2.6: arteria carotis interna)"),
+    _Signal(r"\bcarotid arter(?:y|ies)\b|\bcarotid\b", "carotid artery (generic - Annex VIII 2.6 covers the common/external/internal carotid arteries)"),
+    _Signal(r"\barteriae cerebrales\b|\bcerebral arter(?:y|ies)\b", "cerebral artery/arteries (Annex VIII 2.6: arteriae cerebrales)"),
+    _Signal(r"\btruncus brachiocephalicus\b|\bbrachiocephalic trunk\b", "brachiocephalic trunk (Annex VIII 2.6: truncus brachiocephalicus)"),
+    _Signal(r"\bvenae cordis\b|\bcardiac vein(?:s)?\b", "cardiac vein(s) (Annex VIII 2.6: venae cordis)"),
+    _Signal(r"\bvenae pulmonales\b|\bpulmonary vein(?:s)?\b", "pulmonary vein(s) (Annex VIII 2.6: venae pulmonales)"),
+    _Signal(r"\bvena cava superior\b|\bsuperior vena cava\b", "superior vena cava (Annex VIII 2.6: vena cava superior)"),
+    _Signal(r"\bvena cava inferior\b|\binferior vena cava\b", "inferior vena cava (Annex VIII 2.6: vena cava inferior)"),
+    _Signal(r"\bvena cava\b", "vena cava (generic - Annex VIII 2.6 covers both superior and inferior)"),
+    _Signal(r"\bcirculatory system\b", "circulatory system (generic phrase, not itself Annex VIII 2.6's defined term - verify it means the CENTRAL circulatory system, not peripheral vasculature)"),
 ]
+# Annex VIII 2.7: "'Central nervous system' means the brain, meninges and
+# spinal cord." Only three anatomical structures - note "meninges" is
+# easy to miss if grounding from common sense rather than the definition
+# itself.
 _CNS_SIGNALS = [
-    _Signal(r"\bbrain\b|\bcerebral\b", "brain/cerebral"),
-    _Signal(r"\bspinal cord\b|\bcentral nervous system\b|\bcns\b", "spinal cord / CNS"),
+    _Signal(r"\bbrain\b|\bcerebral\b", "brain/cerebral (Annex VIII 2.7: 'the brain')"),
+    _Signal(r"\bmeninges\b|\bmeningeal\b", "meninges (Annex VIII 2.7 - easily missed vs. brain/spinal cord)"),
+    _Signal(r"\bspinal cord\b", "spinal cord (Annex VIII 2.7: 'the...spinal cord')"),
+    _Signal(r"\bcentral nervous system\b|\bcns\b", "explicitly 'central nervous system' / CNS"),
 ]
 _PLACED_IN_TEETH_SIGNALS = [
     # Deliberately narrower than "dental implant" - see MDCG 2021-24 Note 4
@@ -378,9 +535,85 @@ _BREAST_MESH_SIGNALS = [
 ]
 _ACTIVE_IMPLANTABLE_SIGNALS = [
     _Signal(r"\bpacemaker", "pacemaker"),
-    _Signal(r"\b(?:implantable )?(?:cardioverter )?defibrillator|\bicd\b", "implantable cardioverter defibrillator"),
+    # Requires an "implantable" or "cardioverter" qualifier, NOT bare
+    # "defibrillator" - an automated EXTERNAL defibrillator (AED) is
+    # explicitly non-implantable (it belongs under Rule 22, not this
+    # active-implantable-accessory signal) and would otherwise be a false
+    # positive here.
+    _Signal(r"\bimplantable (?:cardioverter )?defibrillator\b|\bcardioverter defibrillator\b|\bicd\b", "implantable cardioverter defibrillator"),
     _Signal(r"\bcochlear implant", "cochlear implant"),
     _Signal(r"\b(?:neuro|nerve) ?stimulator", "neuro/nerve stimulator"),
+]
+
+# =========================================================================
+# Shared physical-effect vocabulary (Rules 6-10)
+# =========================================================================
+# Rules 6, 7, 9 and 10 all turn on whether a device "supplies/emits
+# ionising radiation" - the regulation itself is inconsistent about
+# spelling this across rules (Rule 6 uses "ionising," Rule 7/9/10 use
+# "ionizing"), so both are matched.
+_IONISING_RADIATION_SIGNALS = [
+    _Signal(r"\bionising radiation\b|\bionizing radiation\b", "ionising/ionizing radiation (Rules 6/7/9/10 wording)"),
+]
+# Rules 7 and 8: "undergo chemical change in the body."
+_CHEMICAL_CHANGE_SIGNALS = [
+    _Signal(r"\bundergo(?:es)? chemical change\b|\bchemical change in the body\b", "undergoes chemical change in the body (Rules 7/8 wording)"),
+]
+
+# --- Rule 9: active therapeutic devices administering/exchanging energy ---
+_ADMINISTERS_EXCHANGES_ENERGY_SIGNALS = [
+    _Signal(r"\badminister(?:s)? or exchange(?:s)? energy\b", "administer or exchange energy (Rule 9 wording)"),
+    _Signal(r"\bexchange(?:s)? energy\b", "exchanges energy (Rule 9 wording)"),
+    _Signal(r"\badminister(?:s)? energy\b", "administers energy (Rule 9 wording)"),
+]
+# Rule 9's fourth paragraph: "All active devices intended to emit
+# ionizing radiation for therapeutic purposes...are classified as class
+# IIb." Distinct from Rule 10's diagnostic/interventional radiology
+# signal - same underlying "ionising radiation" vocabulary, different
+# purpose (therapeutic vs. diagnostic).
+_IONISING_RADIATION_THERAPEUTIC_SIGNALS = [
+    _Signal(r"\bionising radiation\b.{0,30}therapeutic\b|\bionizing radiation\b.{0,30}therapeutic\b", "ionising radiation for therapeutic purposes (Rule 9 wording)"),
+    _Signal(r"\bradiotherapy\b", "radiotherapy"),
+    _Signal(r"\btherapeutic radiology\b", "therapeutic radiology (Rule 9/10 wording)"),
+]
+
+# --- Rule 10: active devices for diagnosis and monitoring ---
+_DIAGNOSTIC_ENERGY_ABSORBED_SIGNALS = [
+    _Signal(r"\bsupply(?:ies)? energy\b.{0,40}absorbed by the human body\b", "supplies energy absorbed by the human body (Rule 10 wording)"),
+    _Signal(r"\benergy\b.{0,20}absorbed by the (?:human )?body\b", "energy absorbed by the body (Rule 10 wording)"),
+]
+_DIAGNOSTIC_ILLUMINATE_SIGNALS = [
+    _Signal(r"\billuminat(?:e|es|ion)\b.{0,30}visible spectrum\b", "illuminate...visible spectrum (Rule 10 wording)"),
+    _Signal(r"\bvisible spectrum\b", "visible spectrum (Rule 10 wording)"),
+]
+_RADIOPHARMACEUTICAL_SIGNALS = [
+    _Signal(r"\bradiopharmaceutical", "radiopharmaceutical(s) (Rule 10 wording)"),
+    _Signal(r"\bin vivo distribution\b", "in vivo distribution (Rule 10 wording)"),
+]
+_DIRECT_DIAGNOSIS_VITAL_SIGNALS = [
+    _Signal(r"\bdirect diagnosis\b", "direct diagnosis (Rule 10 / Annex VIII 3.7 wording)"),
+    _Signal(r"\bvital physiological process", "vital physiological process(es) (Rule 10 wording)"),
+]
+_IMMEDIATE_DANGER_SIGNALS = [
+    _Signal(r"\bimmediate danger\b", "immediate danger (Rule 10 wording)"),
+    # Rule 10's own named examples of vital parameters: "variations in
+    # cardiac performance, respiration, activity of the central nervous
+    # system."
+    _Signal(r"\bcardiac performance\b", "cardiac performance (Rule 10 named example)"),
+    _Signal(r"\brespiration\b", "respiration (Rule 10 named example)"),
+]
+_DIAGNOSTIC_THERAPEUTIC_RADIOLOGY_SIGNALS = [
+    _Signal(r"\bdiagnostic radiology\b|\btherapeutic radiology\b", "diagnostic/therapeutic radiology (Rule 10 wording)"),
+    _Signal(r"\binterventional radiology\b", "interventional radiology (Rule 10 wording)"),
+    _Signal(r"\bct scan(?:ner)?\b|\bcomputed tomography\b", "CT scanner / computed tomography"),
+    _Signal(r"\bfluoroscop", "fluoroscopy"),
+]
+
+# --- Rule 22: active therapeutic devices with integrated diagnostic function ---
+_CLOSED_LOOP_AED_SIGNALS = [
+    _Signal(r"\bclosed[- ]loop\b", "closed-loop system (Rule 22 named example)"),
+    _Signal(r"\bautomated external defibrillator\b|\baed\b", "automated external defibrillator (Rule 22 named example)"),
+    _Signal(r"\bintegrated diagnostic function\b|\bincorporated diagnostic function\b", "integrated/incorporated diagnostic function (Rule 22 wording)"),
 ]
 
 # =========================================================================
@@ -425,6 +658,7 @@ _TISSUE_ANIMAL_SIGNALS = [
     _Signal(r"\bbovine\b", "bovine"),
     _Signal(r"\bxenograft", "xenograft"),
     _Signal(r"\banimal[- ](?:derived|origin|sourced)", "animal-derived/origin/sourced"),
+    _Signal(r"\banimal tissue\b|\banimal cells?\b", "animal tissue/cells (Rule 18 wording)"),
 ]
 _TISSUE_HUMAN_SIGNALS = [
     _Signal(r"\ballograft", "allograft"),
@@ -436,6 +670,75 @@ _INHALATION_SIGNALS = [
     _Signal(r"\binhaler\b", "inhaler"),
     _Signal(r"\bnebuli[sz]er\b", "nebuliser"),
     _Signal(r"\binhalation\b", "inhalation"),
+]
+# Rule 20: "unless their mode of action has an essential impact on the
+# efficacy and safety of the administered medicinal product or they are
+# intended to treat life-threatening conditions."
+_INHALATION_LIFE_THREATENING_SIGNALS = [
+    _Signal(r"\blife-?threatening condition", "life-threatening condition(s) (Rule 20 wording)"),
+    _Signal(r"\bessential impact\b.{0,30}efficacy and safety\b", "essential impact on efficacy and safety (Rule 20 wording)"),
+]
+
+# --- Rule 12: active devices administering/removing substances ---
+_ADMINISTERS_OR_REMOVES_SUBSTANCES_SIGNALS = [
+    # Deliberately permissive middle gap (up to 20 chars of "and", "or",
+    # "and/or", punctuation, etc.) rather than requiring the regulation's
+    # exact "and/or" - real descriptions paraphrase this connector freely.
+    _Signal(r"\badminister(?:s)?\b.{0,20}remove(?:s)?\b", "administers...removes (Rule 12 wording)"),
+    _Signal(r"\bremove(?:s)?\b.{0,40}(?:from the body|from the patient)", "removes...from the body (Rule 12 wording)"),
+    _Signal(r"\binfusion pump\b|\bfeeding pump\b|\bsuction pump\b|\bdialysis\b", "named Rule 12 device type (infusion/feeding/suction pump, dialysis)"),
+]
+
+# --- Rule 16: disinfecting/cleaning/rinsing/hydrating/sterilising devices ---
+_DISINFECT_CONTACT_LENS_SIGNALS = [
+    _Signal(r"\bcontact lens.{0,30}(?:disinfect|clean|rins|hydrat)", "disinfecting/cleaning/rinsing/hydrating contact lenses (Rule 16 wording)"),
+    _Signal(r"(?:disinfect|clean|rins|hydrat)\w*\b.{0,30}contact lens", "disinfecting/cleaning contact lenses (Rule 16 wording)"),
+    _Signal(r"\bcontact lens (?:solution|storing solution|cleaner)\b", "contact lens solution/cleaner"),
+]
+_DISINFECT_INVASIVE_ENDPOINT_SIGNALS = [
+    _Signal(r"\bwasher-disinfector\b.{0,40}(?:invasive|endoscop)", "washer-disinfector for invasive devices/endoscopes (Rule 16 wording)"),
+    _Signal(r"\bend point of processing\b", "end point of processing (Rule 16 wording)"),
+    _Signal(r"\bdisinfecting solution\b.{0,40}invasive", "disinfecting solution for invasive devices"),
+]
+_DISINFECT_OTHER_DEVICE_SIGNALS = [
+    _Signal(r"\bdisinfect(?:ing|s)?\b.{0,30}medical device", "disinfecting medical devices (Rule 16 wording)"),
+    _Signal(r"\bsterilis(?:e|ing|ation)\b.{0,30}medical device|\bsterilizing\b.{0,30}medical device", "sterilising medical devices (Rule 16 wording)"),
+]
+_PHYSICAL_ACTION_ONLY_SIGNALS = [
+    _Signal(r"\bphysical action only\b", "physical action only (Rule 16 carve-out wording)"),
+    _Signal(r"\bmechanical (?:action|cleaning) only\b", "mechanical action/cleaning only (Rule 16 carve-out wording)"),
+]
+
+# --- Rule 18: the "intact skin only" carve-out ---
+_INTACT_SKIN_ONLY_SIGNALS = [
+    _Signal(r"\bintact skin only\b", "intact skin only (Rule 18 carve-out wording)"),
+    _Signal(r"\bcontact with intact skin\b", "contact with intact skin (Rule 18 wording)"),
+]
+
+# --- Rule 21: substance-based devices absorbed/dispersed via orifice or skin ---
+_SUBSTANCE_ABSORBED_DISPERSED_SIGNALS = [
+    _Signal(r"\bcomposed of substances\b", "composed of substances (Rule 21 wording)"),
+    _Signal(r"\blocally dispersed\b", "locally dispersed (Rule 21 wording)"),
+    _Signal(r"\babsorbed by (?:the )?human body\b", "absorbed by the human body (Rule 21 wording)"),
+]
+_SYSTEMICALLY_ABSORBED_SIGNALS = [
+    # Deliberately excludes a preceding "not"/"no"/"non-" via negative
+    # lookbehind - "not systemically absorbed" must NOT match this
+    # positive signal (see _NOT_SYSTEMICALLY_ABSORBED_SIGNALS below for
+    # the explicit negative case, same pattern as Rule 5's
+    # liable/not-liable-to-be-absorbed handling).
+    _Signal(r"(?<!not )(?<!non-)(?<!non )\bsystemically absorbed\b|\bsystemic absorption\b", "systemically absorbed (Rule 21 wording)"),
+]
+_NOT_SYSTEMICALLY_ABSORBED_SIGNALS = [
+    _Signal(r"\bnot systemically absorbed\b|\bnon-systemically absorbed\b", "explicitly 'not systemically absorbed' (Rule 21 wording)"),
+]
+_STOMACH_LOWER_GI_SIGNALS = [
+    _Signal(r"\bstomach\b", "stomach (Rule 21 wording)"),
+    _Signal(r"\blower gastrointestinal tract\b|\blower gi tract\b", "lower gastrointestinal tract (Rule 21 wording)"),
+]
+_APPLIED_SKIN_NASAL_ORAL_PHARYNX_SIGNALS = [
+    _Signal(r"\bapplied to the skin\b", "applied to the skin (Rule 21 wording)"),
+    _Signal(r"\bnasal\b.{0,15}(?:cavity)?.{0,15}pharynx\b|\boral cavity\b.{0,15}pharynx\b", "nasal/oral cavity as far as the pharynx (Rule 21 wording)"),
 ]
 
 # =========================================================================
@@ -505,6 +808,40 @@ class KeywordExtractor(Extractor):
                 "invasiveness: no signal found, left at default NON_INVASIVE - verify this is correct."
             )
 
+        # --- Rule 5 body-orifice site detail (only meaningful when
+        # invasive_body_orifice, but harmless to compute regardless -
+        # Rule 5 itself gates on invasiveness) ---
+        if device.invasiveness == Invasiveness.INVASIVE_BODY_ORIFICE:
+            oral_hit = _any_match(text, _ORIFICE_SITE_ORAL_SIGNALS)
+            ear_hit = _any_match(text, _ORIFICE_SITE_EAR_SIGNALS)
+            nasal_hit = _any_match(text, _ORIFICE_SITE_NASAL_SIGNALS)
+            if oral_hit:
+                device.body_orifice_site = BodyOrificeSite.ORAL_CAVITY_TO_PHARYNX
+                signals.append(f"body_orifice_site = ORAL_CAVITY_TO_PHARYNX (matched: {oral_hit.label})")
+            elif ear_hit:
+                device.body_orifice_site = BodyOrificeSite.EAR_CANAL_TO_EARDRUM
+                signals.append(f"body_orifice_site = EAR_CANAL_TO_EARDRUM (matched: {ear_hit.label})")
+            elif nasal_hit:
+                device.body_orifice_site = BodyOrificeSite.NASAL_CAVITY
+                signals.append(f"body_orifice_site = NASAL_CAVITY (matched: {nasal_hit.label})")
+            else:
+                device.body_orifice_site = BodyOrificeSite.OTHER_ORIFICE
+                notes.append(
+                    "body_orifice_site: device is body-orifice-invasive but no oral/ear/nasal "
+                    "site matched - defaulted to OTHER_ORIFICE, meaning Rule 5's short/long-term "
+                    "exemptions for those three specific sites will not apply. Verify this is "
+                    "correct if the description does describe one of those sites."
+                )
+
+            not_absorbed_hit = _any_match(text, _NOT_LIABLE_TO_BE_ABSORBED_SIGNALS)
+            absorbed_hit = _any_match(text, _LIABLE_TO_BE_ABSORBED_SIGNALS)
+            if not_absorbed_hit:
+                device.liable_to_be_absorbed_by_mucous_membrane = False
+                signals.append(f"liable_to_be_absorbed_by_mucous_membrane = False (matched: {not_absorbed_hit.label})")
+            elif absorbed_hit:
+                device.liable_to_be_absorbed_by_mucous_membrane = True
+                signals.append(f"liable_to_be_absorbed_by_mucous_membrane = True (matched: {absorbed_hit.label})")
+
         # --- Duration ---
         transient_hit = _first_match(text, _TRANSIENT_SIGNALS)
         long_term_hit = _first_match(text, _LONG_TERM_SIGNALS)
@@ -524,15 +861,82 @@ class KeywordExtractor(Extractor):
                 "(5-8) depend on this and will not fire without it."
             )
 
+        # --- Rule 2: non-invasive channelling/storing devices ---
+        channels_stores_hit = _any_match(text, _CHANNELS_STORES_SIGNALS)
+        if channels_stores_hit:
+            device.channels_or_stores_for_infusion_administration_or_introduction = True
+            signals.append(
+                f"channels_or_stores_for_infusion_administration_or_introduction = True "
+                f"(matched: {channels_stores_hit.label})"
+            )
+            blood_bag_hit = _any_match(text, _STORAGE_BLOOD_BAG_SIGNALS)
+            organ_tissue_hit = _any_match(text, _STORAGE_ORGAN_TISSUE_SIGNALS)
+            blood_liquid_hit = _any_match(text, _STORAGE_BLOOD_LIQUID_SIGNALS)
+            if blood_bag_hit:
+                device.storage_target = StorageTarget.BLOOD_BAGS
+                signals.append(f"storage_target = BLOOD_BAGS (matched: {blood_bag_hit.label})")
+            elif organ_tissue_hit:
+                device.storage_target = StorageTarget.ORGANS_CELLS_TISSUES
+                signals.append(f"storage_target = ORGANS_CELLS_TISSUES (matched: {organ_tissue_hit.label})")
+            elif blood_liquid_hit:
+                device.storage_target = StorageTarget.BLOOD_OR_OTHER_BODY_LIQUIDS
+                signals.append(f"storage_target = BLOOD_OR_OTHER_BODY_LIQUIDS (matched: {blood_liquid_hit.label})")
+            else:
+                device.storage_target = StorageTarget.OTHER
+                notes.append(
+                    "storage_target: channelling/storing context found but no specific target "
+                    "(blood/organs/blood bags) matched - defaulted to OTHER (Rule 2's Class I "
+                    "catch-all, unless connected to a higher-class active device)."
+                )
+
+        # --- Rule 3: modifies biological/chemical composition; in vitro contact ---
+        modifies_hit = _any_match(text, _MODIFIES_COMPOSITION_SIGNALS)
+        if modifies_hit:
+            device.modifies_biological_or_chemical_composition = True
+            signals.append(f"modifies_biological_or_chemical_composition = True (matched: {modifies_hit.label})")
+            filtration_hit = _any_match(text, _MODIFICATION_FILTRATION_SIGNALS)
+            if filtration_hit:
+                device.modification_treatment_type = ModificationTreatmentType.FILTRATION_CENTRIFUGATION_GAS_OR_HEAT_EXCHANGE
+                signals.append(
+                    f"modification_treatment_type = FILTRATION_CENTRIFUGATION_GAS_OR_HEAT_EXCHANGE "
+                    f"(matched: {filtration_hit.label})"
+                )
+            else:
+                device.modification_treatment_type = ModificationTreatmentType.OTHER
+                notes.append(
+                    "modification_treatment_type: composition-modifying context found but no "
+                    "filtration/centrifugation/gas/heat-exchange signal matched - defaulted to "
+                    "OTHER (Rule 3's Class IIb outcome, rather than the IIa exception)."
+                )
+        in_vitro_hit = _any_match(text, _IN_VITRO_SIGNALS)
+        if in_vitro_hit:
+            device.in_vitro_direct_contact_with_cells_tissues_organs_or_embryos = True
+            signals.append(
+                f"in_vitro_direct_contact_with_cells_tissues_organs_or_embryos = True "
+                f"(matched: {in_vitro_hit.label})"
+            )
+
         # --- Implantable / active / software ---
         apply_bool("is_implantable", _IMPLANTABLE_SIGNALS)
 
+        # Annex VIII 2.4 and 2.5 both define their respective device types
+        # as "any ACTIVE device used...to support/modify/replace/restore..."
+        # (therapeutic) or "...to supply information for detecting,
+        # diagnosing, monitoring..." (diagnostic) - i.e. the therapeutic/
+        # diagnostic function vocabulary is ITSELF drawn from a definition
+        # that presupposes active-device status. So a therapeutic or
+        # diagnostic function match is sufficient evidence for is_active on
+        # its own, not just a fallback classification once is_active is
+        # already known some other way (e.g. "a CT scanner" or "monitors
+        # vital signs" should set is_active even with no separate
+        # battery/powered/"active device" phrase present).
         active_hit = _any_match(text, _ACTIVE_SIGNALS)
-        if active_hit:
+        therapeutic_hit = _any_match(text, _ACTIVE_THERAPEUTIC_SIGNALS)
+        diagnostic_hit = _any_match(text, _ACTIVE_DIAGNOSTIC_SIGNALS)
+        if active_hit or therapeutic_hit or diagnostic_hit:
             device.is_active = True
-            signals.append(f"is_active = True (matched: {active_hit.label})")
-            therapeutic_hit = _any_match(text, _ACTIVE_THERAPEUTIC_SIGNALS)
-            diagnostic_hit = _any_match(text, _ACTIVE_DIAGNOSTIC_SIGNALS)
+            is_active_reason = active_hit or therapeutic_hit or diagnostic_hit
+            signals.append(f"is_active = True (matched: {is_active_reason.label})")
             if therapeutic_hit:
                 device.active_type = ActiveDeviceType.THERAPEUTIC
                 signals.append(f"active_type = THERAPEUTIC (matched: {therapeutic_hit.label})")
@@ -545,6 +949,92 @@ class KeywordExtractor(Extractor):
                     "active_type: device is active but no therapeutic/diagnostic signal "
                     "found - defaulted to OTHER_ACTIVE (Rule 13's residual bucket). Verify "
                     "this is correct rather than a missed Rule 9/10 signal."
+                )
+
+            # --- Rule 9: administers or exchanges energy ---
+            energy_hit = _any_match(text, _ADMINISTERS_EXCHANGES_ENERGY_SIGNALS)
+            if energy_hit:
+                device.administers_or_exchanges_energy = True
+                signals.append(f"administers_or_exchanges_energy = True (matched: {energy_hit.label})")
+
+            therapeutic_radiation_hit = _any_match(text, _IONISING_RADIATION_THERAPEUTIC_SIGNALS)
+            if therapeutic_radiation_hit:
+                device.emits_ionising_radiation_therapeutic = True
+                signals.append(
+                    f"emits_ionising_radiation_therapeutic = True (matched: {therapeutic_radiation_hit.label})"
+                )
+
+            # --- Rule 10: active diagnostic/monitoring device detail ---
+            if device.active_type == ActiveDeviceType.DIAGNOSTIC_MONITORING:
+                energy_absorbed_hit = _any_match(text, _DIAGNOSTIC_ENERGY_ABSORBED_SIGNALS)
+                if energy_absorbed_hit:
+                    device.diagnostic_supplies_energy_absorbed_by_body = True
+                    signals.append(
+                        f"diagnostic_supplies_energy_absorbed_by_body = True (matched: {energy_absorbed_hit.label})"
+                    )
+                illuminate_hit = _any_match(text, _DIAGNOSTIC_ILLUMINATE_SIGNALS)
+                if illuminate_hit:
+                    device.diagnostic_illuminates_patient_visible_spectrum_only = True
+                    signals.append(
+                        f"diagnostic_illuminates_patient_visible_spectrum_only = True (matched: {illuminate_hit.label})"
+                    )
+                radiopharm_hit = _any_match(text, _RADIOPHARMACEUTICAL_SIGNALS)
+                if radiopharm_hit:
+                    device.diagnostic_images_in_vivo_radiopharmaceutical_distribution = True
+                    signals.append(
+                        f"diagnostic_images_in_vivo_radiopharmaceutical_distribution = True (matched: {radiopharm_hit.label})"
+                    )
+                direct_diag_hit = _any_match(text, _DIRECT_DIAGNOSIS_VITAL_SIGNALS)
+                if direct_diag_hit:
+                    device.diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes = True
+                    signals.append(
+                        f"diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes = True "
+                        f"(matched: {direct_diag_hit.label})"
+                    )
+                    danger_hit = _any_match(text, _IMMEDIATE_DANGER_SIGNALS)
+                    if danger_hit:
+                        device.diagnostic_variation_could_cause_immediate_danger = True
+                        signals.append(
+                            f"diagnostic_variation_could_cause_immediate_danger = True (matched: {danger_hit.label})"
+                        )
+                    else:
+                        questions.append(
+                            "This appears to be a device for direct diagnosis or monitoring of "
+                            "vital physiological processes. Per Rule 10, if the nature of "
+                            "variations in what it monitors 'could result in immediate danger to "
+                            "the patient' (the regulation's own examples: cardiac performance, "
+                            "respiration, activity of the central nervous system), it is Class "
+                            "IIb rather than the default Class IIa. Please specify whether this "
+                            "applies, or consult a regulatory professional."
+                        )
+
+            # --- Rule 12: administers/removes substances to/from the body ---
+            admin_remove_hit = _any_match(text, _ADMINISTERS_OR_REMOVES_SUBSTANCES_SIGNALS)
+            if admin_remove_hit:
+                device.administers_or_removes_substances_to_from_body = True
+                signals.append(
+                    f"administers_or_removes_substances_to_from_body = True (matched: {admin_remove_hit.label})"
+                )
+
+            # --- Rule 22: active therapeutic device with integrated diagnostic function ---
+            closed_loop_hit = _any_match(text, _CLOSED_LOOP_AED_SIGNALS)
+            if closed_loop_hit:
+                device.is_active_therapeutic_with_integrated_diagnostic_function = True
+                signals.append(
+                    f"is_active_therapeutic_with_integrated_diagnostic_function = True "
+                    f"(matched: {closed_loop_hit.label})"
+                )
+
+        # --- Rule 10 (continued): diagnostic/interventional ionising radiation.
+        # Gated on is_active alone (not DIAGNOSTIC_MONITORING specifically) per
+        # the rule's own text, which covers "diagnostic or therapeutic
+        # radiology" devices generally. ---
+        if device.is_active:
+            radiology_hit = _any_match(text, _DIAGNOSTIC_THERAPEUTIC_RADIOLOGY_SIGNALS)
+            if radiology_hit:
+                device.emits_ionising_radiation_diagnostic_or_interventional = True
+                signals.append(
+                    f"emits_ionising_radiation_diagnostic_or_interventional = True (matched: {radiology_hit.label})"
                 )
 
         software_hit = apply_bool("is_software", _SOFTWARE_SIGNALS)
@@ -650,6 +1140,10 @@ class KeywordExtractor(Extractor):
         apply_bool("is_breast_implant_or_surgical_mesh", _BREAST_MESH_SIGNALS)
         apply_bool("is_active_implantable_or_accessory", _ACTIVE_IMPLANTABLE_SIGNALS)
 
+        # --- Shared Rules 6-8 physical effects ---
+        apply_bool("supplies_ionising_radiation", _IONISING_RADIATION_SIGNALS)
+        apply_bool("undergoes_chemical_change_in_body", _CHEMICAL_CHANGE_SIGNALS)
+
         # --- Physical effects / medicinal content ---
         apply_bool("has_biological_effect_or_wholly_mainly_absorbed", _ABSORBABLE_SIGNALS)
         apply_bool("administers_medicinal_product", _ADMINISTERS_MEDICINAL_PRODUCT_SIGNALS)
@@ -657,9 +1151,38 @@ class KeywordExtractor(Extractor):
         apply_bool("is_contraceptive_or_sti_prevention", _CONTRACEPTIVE_SIGNALS)
         apply_bool("is_xray_diagnostic_image_recording_device", _XRAY_RECORDING_SIGNALS)
         apply_bool("contains_nanomaterial", _NANOMATERIAL_SIGNALS)
-        apply_bool("administers_medicinal_product_by_inhalation", _INHALATION_SIGNALS)
 
-        # --- Tissue origin ---
+        inhalation_hit = apply_bool("administers_medicinal_product_by_inhalation", _INHALATION_SIGNALS)
+        if inhalation_hit:
+            life_threat_hit = _any_match(text, _INHALATION_LIFE_THREATENING_SIGNALS)
+            if life_threat_hit:
+                device.inhalation_essential_impact_or_life_threatening = True
+                signals.append(
+                    f"inhalation_essential_impact_or_life_threatening = True (matched: {life_threat_hit.label})"
+                )
+
+        # --- Rule 16: disinfecting/cleaning/rinsing/hydrating/sterilising ---
+        lens_care_hit = _any_match(text, _DISINFECT_CONTACT_LENS_SIGNALS)
+        invasive_endpoint_hit = _any_match(text, _DISINFECT_INVASIVE_ENDPOINT_SIGNALS)
+        other_device_hit = _any_match(text, _DISINFECT_OTHER_DEVICE_SIGNALS)
+        physical_only_hit = _any_match(text, _PHYSICAL_ACTION_ONLY_SIGNALS)
+        if lens_care_hit:
+            device.disinfect_clean_target = DisinfectCleanTarget.CONTACT_LENSES
+            signals.append(f"disinfect_clean_target = CONTACT_LENSES (matched: {lens_care_hit.label})")
+        elif invasive_endpoint_hit:
+            device.disinfect_clean_target = DisinfectCleanTarget.INVASIVE_DEVICE_END_POINT
+            signals.append(f"disinfect_clean_target = INVASIVE_DEVICE_END_POINT (matched: {invasive_endpoint_hit.label})")
+        elif other_device_hit and physical_only_hit:
+            device.disinfect_clean_target = DisinfectCleanTarget.PHYSICAL_ACTION_ONLY_NON_LENS
+            signals.append(
+                f"disinfect_clean_target = PHYSICAL_ACTION_ONLY_NON_LENS (matched: "
+                f"{other_device_hit.label} + {physical_only_hit.label}) - Rule 16 carve-out, does not apply"
+            )
+        elif other_device_hit:
+            device.disinfect_clean_target = DisinfectCleanTarget.OTHER_MEDICAL_DEVICE
+            signals.append(f"disinfect_clean_target = OTHER_MEDICAL_DEVICE (matched: {other_device_hit.label})")
+
+        # --- Tissue origin (Rule 18) ---
         animal_hit = _any_match(text, _TISSUE_ANIMAL_SIGNALS)
         human_hit = _any_match(text, _TISSUE_HUMAN_SIGNALS)
         if animal_hit:
@@ -670,6 +1193,38 @@ class KeywordExtractor(Extractor):
             device.contains_human_or_animal_tissue_or_cells = True
             device.tissue_origin = TissueOrigin.HUMAN
             signals.append(f"contains_human_or_animal_tissue_or_cells = True, tissue_origin = HUMAN (matched: {human_hit.label})")
+        if device.contains_human_or_animal_tissue_or_cells:
+            intact_skin_hit = _any_match(text, _INTACT_SKIN_ONLY_SIGNALS)
+            if intact_skin_hit:
+                device.tissue_contacts_intact_skin_only = True
+                signals.append(f"tissue_contacts_intact_skin_only = True (matched: {intact_skin_hit.label})")
+
+        # --- Rule 21: substance-based devices absorbed/dispersed via orifice or skin ---
+        substance_hit = _any_match(text, _SUBSTANCE_ABSORBED_DISPERSED_SIGNALS)
+        if substance_hit:
+            device.composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin = True
+            signals.append(
+                f"composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin = True "
+                f"(matched: {substance_hit.label})"
+            )
+            not_systemic_hit = _any_match(text, _NOT_SYSTEMICALLY_ABSORBED_SIGNALS)
+            systemic_hit = _any_match(text, _SYSTEMICALLY_ABSORBED_SIGNALS)
+            if not_systemic_hit:
+                device.systemically_absorbed = False
+                signals.append(f"systemically_absorbed = False (matched: {not_systemic_hit.label})")
+            elif systemic_hit:
+                device.systemically_absorbed = True
+                signals.append(f"systemically_absorbed = True (matched: {systemic_hit.label})")
+            gi_hit = _any_match(text, _STOMACH_LOWER_GI_SIGNALS)
+            if gi_hit:
+                device.achieves_purpose_in_stomach_or_lower_gi_tract = True
+                signals.append(f"achieves_purpose_in_stomach_or_lower_gi_tract = True (matched: {gi_hit.label})")
+            applied_hit = _any_match(text, _APPLIED_SKIN_NASAL_ORAL_PHARYNX_SIGNALS)
+            if applied_hit:
+                device.applied_to_skin_or_nasal_oral_cavity_to_pharynx = True
+                signals.append(
+                    f"applied_to_skin_or_nasal_oral_cavity_to_pharynx = True (matched: {applied_hit.label})"
+                )
 
         # --- Wound contact (Rule 4) ---
         wound_gate_hit = _any_match(text, _WOUND_CONTACT_GATE_SIGNALS)
