@@ -1,0 +1,44 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 18 (pages 53-54 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is not a European Commission document, and it cannot be regarded as reflecting the official position of the European Commission. Any views expressed in this document are not legally binding and only the Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 18 - Devices manufactured utilizing tissue or cells of human or animal origin or their derivatives
+General explanation of the rule
+This rule covers devices manufactured utilizing tissues or cells of human or animal origin, or their derivatives, which are non-viable or rendered
+non-viable, i.e. where there is no longer any capacity for cellular metabolic activity. This includes devices containing derivatives of human origin
+that have an ancillary action to that of the device, as well as devices that contain or are made of animal tissues (non-derivative) that have been
+rendered non-viable, or their derivatives.
+Class Rule 18 Examples
+III All devices manufactured utilising tissues or cells of human or animal origin, or their • Animal derived biological heart valves
+derivatives1, which are non- viable or rendered non-viable, are classified as class III, • Porcine xenograft dressings
+• Devices made from animal sourced
+collagen/gelatine
+• Devices utilising hyaluronic acid of animal origin
+• Substance-based devices containing collagen
+for use in body orifices
+• Collagen dermal fillers
+• Bone graft substitutes
+I3 unless such devices are manufactured utilising tissues or cells of animal origin, or their • Leather components of orthopaedic appliances
+derivatives, which are non-viable or rendered non-viable and are devices intended to come
+into contact with intact skin only.
+Practical issues of classification
+53
+
+===PAGE 54===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+Note 1: Derivatives are products that are processed from animal tissues and excludes products made by animals e.g. milk, silk, beeswax,
+honey, propolis, royal jelly, hair, lanolin.
+Note 2: The industrial manufacturing process for some devices may employ raw materials which contain small amounts of tallow or tallow
+derivatives (e.g. stearates in polymers) for example for greasing the moulds. Such substances, which may be present in the final device only
+as trace amounts, are not considered as derivatives of animal tissues for the purpose of this rule which therefore does not apply. However, if
+such substances are a constituent part of a device the rule will apply, for example wound dressings impregnated with tallow. Such an exemption
+applies only to classification, and not to other obligations related to devices manufactured utilising non-viable substances of animal origin, such
+as those referred to in Annex I 13.2.
+Note 3: This rule does not apply to devices manufactured utilizing tissues or cells of animal origin or their derivatives coming into contact with
+intact skin only. In such cases they are in class I in accordance to Rule 1. Intact skin includes the skin around an established stoma unless the
+skin is breached.

@@ -559,8 +559,12 @@ def test_rule18_animal_tissue_intact_skin_only_carve_out():
         tissue_contacts_intact_skin_only=True,
     )
     outcome = Rule18().evaluate(device)
-    assert not outcome.applies
-    assert outcome.ambiguous
+    # Per MDCG 2021-24 Note 3, this carve-out is Class I "in accordance
+    # with Rule 1" - a resolved, cited outcome, not left ambiguous. See
+    # docs/CLARIFICATIONS_RULE_18.md.
+    assert outcome.applies
+    assert outcome.device_class == DeviceClass.I
+    assert not outcome.ambiguous
 
 
 # --- Rule 19 ---

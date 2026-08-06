@@ -1088,6 +1088,25 @@ class Rule18(ClassificationRule):
     derivatives, which are non-viable or rendered non-viable and are
     devices intended to come into contact with intact skin only."
     (Annex VIII, 7.5)
+
+    Phase 1 (working from EUR-Lex text alone) flagged the carve-out as an
+    unresolved regulatory gap: the rule text says it doesn't apply, but
+    doesn't say what class then applies. Verified against MDCG 2021-24
+    Rev.1, "Guidance on classification of medical devices" (pages 53-54;
+    see docs/legal_sources/mdcg_2021-24_rule_18_tissue_devices.txt and
+    docs/CLARIFICATIONS_RULE_18.md), that assumption was WRONG - MDCG's
+    Note 3 resolves it explicitly:
+
+    "This rule does not apply to devices manufactured utilizing tissues or
+    cells of animal origin or their derivatives coming into contact with
+    intact skin only. In such cases they are in class I in accordance to
+    Rule 1. Intact skin includes the skin around an established stoma
+    unless the skin is breached."
+
+    The `ambiguous` flag has been removed accordingly - this is now a
+    resolved, cited outcome (Class I), not a judgement call. The real
+    example MDCG gives for it: "Leather components of orthopaedic
+    appliances."
     """
 
     rule_id = "Rule 18"
@@ -1100,33 +1119,32 @@ class Rule18(ClassificationRule):
             and device.tissue_origin == TissueOrigin.ANIMAL
             and device.tissue_contacts_intact_skin_only
         )
-        applies = base_gate and not carve_out
+        escalates_to_iii = base_gate and not carve_out
+
+        if escalates_to_iii:
+            device_class = DeviceClass.III
+        elif carve_out:
+            device_class = DeviceClass.I
+        else:
+            device_class = None
+
         return RuleOutcome(
             rule_id=self.rule_id,
-            applies=applies,
-            device_class=DeviceClass.III if applies else None,
+            applies=base_gate,
+            device_class=device_class,
             rationale=(
                 "Device is manufactured utilising non-viable tissues/cells of "
                 "human or animal origin."
-                if applies
+                if escalates_to_iii
                 else (
-                    "Device falls within the animal-origin / intact-skin-contact-"
-                    "only carve-out (or does not use human/animal tissue at all); "
-                    "Rule 18 does not apply."
+                    "Animal-origin tissue/cells contacting intact skin only: "
+                    "per MDCG 2021-24 Note 3, this falls outside Rule 18's "
+                    "escalation and is Class I in accordance with Rule 1."
+                    if carve_out
+                    else "Device does not use human/animal tissue or cells; Rule 18 does not apply."
                 )
             ),
             source_citation=self.source_citation,
-            ambiguous=carve_out,
-            ambiguous_note=(
-                "The regulation exempts this animal-tissue/intact-skin-only "
-                "case from Rule 18 but does not state what class then applies. "
-                "In practice this typically falls back to Rule 1 (Class I, if "
-                "non-invasive) or Rule 4 (if it also contacts injured skin), "
-                "but Annex VIII does not say so explicitly for this carve-out - "
-                "flagged rather than assumed."
-                if carve_out
-                else None
-            ),
         )
 
 

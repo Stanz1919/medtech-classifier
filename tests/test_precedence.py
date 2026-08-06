@@ -11,7 +11,6 @@ from rules_engine.models import (
     DeviceClass,
     Invasiveness,
     NanomaterialExposurePotential,
-    TissueOrigin,
 )
 
 
@@ -56,12 +55,17 @@ def test_no_rule_applies_returns_none_and_explains():
 
 
 def test_ambiguous_flags_surface_in_final_result():
+    # Rule 18's animal-tissue/intact-skin carve-out USED to be the example
+    # here, but MDCG 2021-24 Note 3 resolved it explicitly (Class I) - see
+    # docs/CLARIFICATIONS_RULE_18.md - so it's no longer flagged ambiguous.
+    # Rule 8's "ancillary component" carve-out remains a genuine judgement
+    # call per MDCG's own Note 1 (no blanket rule), so it's used instead.
     device = DeviceAttributes(
-        contains_human_or_animal_tissue_or_cells=True,
-        tissue_origin=TissueOrigin.ANIMAL,
-        tissue_contacts_intact_skin_only=True,
+        is_implantable=True,
+        is_joint_replacement=True,
+        is_ancillary_component=True,
     )
     result = EUMDRClassificationEngine().classify(device)
     assert result.has_ambiguous_flags
     ambiguous_rule_ids = {o.rule_id for o in result.ambiguous_outcomes}
-    assert "Rule 18" in ambiguous_rule_ids
+    assert "Rule 8" in ambiguous_rule_ids

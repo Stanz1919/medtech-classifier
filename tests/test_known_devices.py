@@ -368,6 +368,57 @@ CASES = [
         DeviceClass.III,
         [],
     ),
+    # --- The following seven Rule 18 cases are named examples from MDCG
+    # 2021-24 Rev.1, pages 53-54 (see
+    # docs/legal_sources/mdcg_2021-24_rule_18_tissue_devices.txt) ---
+    (
+        "Animal-derived biological heart valve (MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "animal"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Porcine xenograft dressing (MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "animal"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Collagen dermal filler, animal-sourced (MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "animal"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Bone graft substitute (MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "human"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Device made from animal-sourced collagen/gelatine (MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "animal"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Substance-based device containing collagen for use in body orifices "
+        "(MDCG 2021-24 Rule 18 named example, Class III)",
+        {"contains_human_or_animal_tissue_or_cells": True, "tissue_origin": "human"},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Leather components of orthopaedic appliances - animal-derived, intact skin contact only "
+        "(MDCG 2021-24 Rule 18 named example + Note 3, Class I via Rule 1)",
+        {
+            "contains_human_or_animal_tissue_or_cells": True,
+            "tissue_origin": "animal",
+            "tissue_contacts_intact_skin_only": True,
+        },
+        DeviceClass.I,
+        [],
+    ),
     (
         "Sterile primary wound dressing (mechanical barrier)",
         {
