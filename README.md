@@ -17,14 +17,13 @@ why.
 explicit, unit-tested Python code implementing Annex VIII Rules 1-22 and
 the precedence logic that governs them, written directly against the
 verbatim text of Regulation (EU) 2017/745 fetched from EUR-Lex (see
-`docs/legal_sources/`). A future phase may add an LLM-assisted step that
-turns free text into the structured input this engine consumes - but the
-classification decision itself will always be this deterministic engine,
-never the LLM.
+`docs/legal_sources/`). The only place free text is involved at all is
+the extraction layer (Phase 2, below) that turns a description into
+structured input - the classification decision itself is always this
+deterministic engine, never an LLM, and never the extractor's own
+judgement.
 
-## Phase 1 (current scope)
-
-This repository currently implements **only** the rules engine core:
+## Phase 1: the rules engine (done)
 
 - `rules_engine/models.py` - the structured `DeviceAttributes` input
   model, `DeviceClass` / `RuleOutcome` / `ClassificationResult` types.
@@ -36,14 +35,57 @@ This repository currently implements **only** the rules engine core:
 - `rules_engine/eu_mdr/engine.py` - evaluates all 22 rules and applies
   Annex VIII 3.5's "highest classification wins" precedence, plus the
   Article 52(7) Is/Im/Ir sub-qualifiers.
-- `cli.py` - a CLI harness that takes a structured attribute dict
-  directly (JSON file or stdin), bypassing any text-extraction step.
-- `tests/` - 99 unit tests: every rule's branches individually, engine-
-  level precedence, and ~30 known real-world device ground-truth cases.
 
-**Not yet built** (later phases): free-text extraction (`extraction/`),
-standards mapping (`standards_mapper/`), and the Streamlit UI (`ui/`).
-Their package directories exist as placeholders only.
+## Phase 2: free-text extraction (done)
+
+- `extraction/base.py` - the `Extractor` interface and `ExtractionResult`
+  (a `DeviceAttributes` plus a human-readable log of exactly which words
+  triggered which field, and which fields it could not determine). Kept
+  method-agnostic so a future LLM-based extractor could implement the
+  same interface without the rules engine or CLI caring which produced
+  its input.
+- `extraction/keyword_extractor.py` - `KeywordExtractor`, the **default**
+  extractor per the project brief (keyword/rule-based is the lead path,
+  not a fallback for an LLM). Deliberately bounded scope: it targets the
+  ~35 `DeviceAttributes` fields most reliably signalled by short
+  descriptions, and explicitly leaves the rest at their defaults rather
+  than guess - most notably Rule 11's software severity tiering, which
+  MDCG's own guidance says requires clinical judgement no keyword list
+  should approximate (see `docs/CLARIFICATIONS_RULE_11.md`). See that
+  module's docstring for the full documented coverage and known limits.
+- `cli.py --text "..."` - runs a description through the extractor, then
+  the same engine as the structured-input path, printing both the
+  matched signals (why it concluded what it did) and anything it could
+  not determine.
+- Two real bugs were found and fixed by this extractor's own test suite
+  before commit: an `\belectrical` regex that missed plain "electric",
+  and a dental-filling case where `placed_in_teeth` alone had no effect
+  because Rule 8's gate never fired - both documented in
+  `tests/test_extraction.py` alongside the fix.
+- **Full transparency by default**: `cli.py`'s human-readable report
+  shows the status of all 22 rules, not just the deciding one - a Class
+  I result visibly means "we checked everything and only Rule 1's
+  default applied," not a silent absence of information.
+- **Clarifying questions, not just warnings, for genuine judgement
+  calls**: when the extractor detects decision-support or monitoring
+  *function* in software but can't determine severity/context from text
+  alone, it never lets that fall into Rule 11's "all other software"
+  bucket by omission - it sets the conservative floor the detected
+  function actually supports and asks the specific question (with each
+  answer's consequence named) needed to finish the job, e.g. "what's the
+  worst realistic consequence if this software's output is wrong -
+  routine, serious deterioration/surgery, or death/irreversible harm?"
+  See `ExtractionResult.clarifying_questions`.
+- Invasiveness/duration keyword lists are grounded directly in the
+  regulation's own defining vocabulary rather than invented synonyms -
+  e.g. Annex VIII 2.3 defines "reusable surgical instrument" via the
+  verbs "cutting, drilling, sawing, scratching, scraping, clamping,
+  retracting, clipping," which are now literal signals, not just nouns
+  like "scalpel."
+
+**Not yet built**: standards mapping (`standards_mapper/`) and the
+Streamlit UI (`ui/`). Their package directories exist as placeholders
+only.
 
 ## Regulatory grounding
 
@@ -130,9 +172,10 @@ engine's strict literal reading of Annex VIII diverges from a commonly
 published industry classification figure, and explains why.
 
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
-cases (147 tests total, 100% statement coverage on
-`rules_engine/eu_mdr/rules.py`) - see `docs/legal_sources/` for the
-retrieved source excerpts behind every citation in this codebase.
+cases, and both `rules_engine/eu_mdr/rules.py` and
+`extraction/keyword_extractor.py` sit at 100% statement coverage (200
+tests total) - see `docs/legal_sources/` for the retrieved source
+excerpts behind every citation in this codebase.
 
 ## Usage
 
@@ -140,12 +183,14 @@ retrieved source excerpts behind every citation in this codebase.
 pip install -e .
 pip install pytest coverage   # dev dependencies, not yet pinned in pyproject
 
-# Run the CLI harness against a structured attribute file
+# Structured input (Phase 1) - bypasses extraction entirely
 python cli.py examples/hip_implant.json
 python cli.py examples/hypodermic_syringe.json --json
-
-# Or pipe JSON in directly
 echo '{"invasiveness": "non_invasive"}' | python cli.py
+
+# Free text (Phase 2) - runs the default keyword extractor first
+python cli.py --text "A sterile, single-use hypodermic syringe used to inject medicinal products under the skin."
+python cli.py --text "A titanium hip replacement implant intended for permanent placement." --json
 
 # Run the tests
 python -m pytest tests/ -v
@@ -153,7 +198,9 @@ python -m pytest tests/ -v
 
 See `rules_engine/models.py` for the full `DeviceAttributes` field
 reference - every field is documented with the Annex VIII rule(s) it
-feeds.
+feeds. See `extraction/keyword_extractor.py`'s module docstring for
+exactly which of those fields the default extractor attempts to infer
+from text, and which it deliberately does not.
 
 ## Project layout
 
@@ -164,11 +211,13 @@ rules_engine/
   eu_mdr/
     rules.py          Rules 1-22
     engine.py          EUMDRClassificationEngine (precedence + qualifiers)
-cli.py                 CLI harness
+extraction/
+  base.py             Extractor interface, ExtractionResult
+  keyword_extractor.py  KeywordExtractor - default free-text extractor
+cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  99 unit tests
-docs/legal_sources/     Verbatim EUR-Lex source text this was built against
-extraction/             Phase 2 placeholder (free-text -> DeviceAttributes)
+tests/                  200 unit tests
+docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
 standards_mapper/       Phase 3 placeholder (ISO 10993 / IEC 60601 / etc.)
 ui/                     Phase 4 placeholder (Streamlit)
 ```

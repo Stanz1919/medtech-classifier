@@ -89,3 +89,47 @@ def test_cli_rejects_invalid_json():
     )
     assert result.returncode == 1
     assert "Invalid JSON input" in result.stderr
+
+
+# --- Phase 2: --text mode ---
+
+
+def test_cli_text_mode_human_readable():
+    result = _run_cli("--text", "A sterile, single-use hypodermic syringe used to inject medicinal products under the skin.")
+    assert result.returncode == 0
+    assert "Extraction (from free text" in result.stdout
+    assert "Predicted classification: Class IIa" in result.stdout
+
+
+def test_cli_text_mode_json_includes_extraction():
+    result = _run_cli("--text", "A titanium hip replacement implant intended for permanent placement in the joint.", "--json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["predicted_class"] == "III"
+    assert payload["extraction"] is not None
+    assert any("invasiveness" in s for s in payload["extraction"]["matched_signals"])
+
+
+def test_cli_text_mode_surfaces_clarifying_questions():
+    """The heartbeat-app case: severity is genuinely undetermined from
+    text alone, so the CLI must show a specific clarifying question, not
+    silently return a confident-looking Class I."""
+    result = _run_cli(
+        "--text",
+        "A mobile app that analyses a patient heartbeat, detects abnormalities, and informs a physician.",
+    )
+    assert result.returncode == 0
+    assert "QUESTIONS TO RESOLVE THIS CLASSIFICATION" in result.stdout
+    assert "Class IIb" in result.stdout
+    assert "Predicted classification: Class IIa" in result.stdout  # conservative floor, not Class I
+
+
+def test_cli_full_rule_breakdown_shown_for_structured_input():
+    """Even a Class III result must show all 22 rules were evaluated, not
+    just the decisive one - full audit trail by default."""
+    result = _run_cli(str(EXAMPLES / "hip_implant.json"))
+    assert result.returncode == 0
+    assert "Full rule-by-rule breakdown (all 22 Annex VIII rules evaluated):" in result.stdout
+    for i in range(1, 23):
+        assert f"Rule {i}" in result.stdout
+    assert "[DECISIVE]" in result.stdout

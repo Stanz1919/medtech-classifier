@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
 """CLI harness for the EU MDR 2017/745 classification rules engine.
 
-Phase 1 scope: takes a structured device-attribute JSON object directly -
-bypassing the (not-yet-built) free-text extraction layer entirely - and
-prints the predicted Annex VIII classification, which rule(s) decided it,
-and why. See README.md for the DeviceAttributes field reference and
-examples/ for sample input files.
+Two input modes:
+  1. Structured attributes (Phase 1) - a JSON object matching
+     DeviceAttributes, bypassing extraction entirely. See README.md for
+     the field reference and examples/ for sample input files.
+  2. Free text (Phase 2) - a device description run through the default
+     keyword extractor (extraction.KeywordExtractor) to produce
+     DeviceAttributes, then classified exactly the same way. Extraction
+     is inherently uncertain (unlike the deterministic rules engine
+     downstream of it) - the report always shows which words drove which
+     conclusion, and flags anything it could not determine, rather than
+     silently guessing. See docs/CLARIFICATIONS.md for the extractor's
+     documented coverage and limitations.
 
 Usage:
     python cli.py examples/hip_implant.json
     python cli.py < examples/hip_implant.json
     python cli.py examples/hip_implant.json --json
+    python cli.py --text "A sterile, single-use hypodermic syringe."
+    python cli.py --text "A sterile, single-use hypodermic syringe." --json
 """
 
 from __future__ import annotations
@@ -22,6 +31,8 @@ import typing
 from enum import Enum
 from pathlib import Path
 
+from extraction.base import ExtractionResult
+from extraction.keyword_extractor import KeywordExtractor
 from rules_engine.eu_mdr.engine import EUMDRClassificationEngine
 from rules_engine.models import ClassificationResult, DeviceAttributes, RuleOutcome
 
@@ -59,7 +70,38 @@ def _coerce_value(field_type, value):
     return value
 
 
-def _result_to_dict(device: DeviceAttributes, result: ClassificationResult) -> dict:
+def _print_extraction_report(extraction: ExtractionResult) -> None:
+    print("Extraction (from free text, via the default keyword extractor):")
+    print("  Matched signals:")
+    if not extraction.matched_signals:
+        print("    (none - no keyword matches found in the given text)")
+    else:
+        for signal in extraction.matched_signals:
+            print(f"    - {signal}")
+    if extraction.unmatched_notes:
+        print("  COULD NOT DETERMINE (verify these manually before trusting the result):")
+        for note in extraction.unmatched_notes:
+            print(f"    ! {note}")
+    if extraction.clarifying_questions:
+        print("  QUESTIONS TO RESOLVE THIS CLASSIFICATION:")
+        for i, question in enumerate(extraction.clarifying_questions, start=1):
+            print(f"    {i}. {question}")
+    print()
+
+
+def _extraction_to_dict(extraction: ExtractionResult) -> dict:
+    return {
+        "matched_signals": extraction.matched_signals,
+        "unmatched_notes": extraction.unmatched_notes,
+        "clarifying_questions": extraction.clarifying_questions,
+    }
+
+
+def _result_to_dict(
+    device: DeviceAttributes,
+    result: ClassificationResult,
+    extraction: ExtractionResult | None = None,
+) -> dict:
     def outcome_to_dict(o: RuleOutcome) -> dict:
         return {
             "rule_id": o.rule_id,
@@ -73,6 +115,7 @@ def _result_to_dict(device: DeviceAttributes, result: ClassificationResult) -> d
 
     return {
         "device_name": device.name,
+        "extraction": _extraction_to_dict(extraction) if extraction is not None else None,
         "predicted_class": result.device_class.value if result.device_class else None,
         "qualifiers": [q.value for q in result.qualifiers],
         "explanation": result.explanation,
@@ -82,11 +125,18 @@ def _result_to_dict(device: DeviceAttributes, result: ClassificationResult) -> d
     }
 
 
-def _print_report(device: DeviceAttributes, result: ClassificationResult) -> None:
+def _print_report(
+    device: DeviceAttributes,
+    result: ClassificationResult,
+    extraction: ExtractionResult | None = None,
+) -> None:
     print(f"Device: {device.name or '(unnamed)'}")
     if device.description:
         print(f"Description: {device.description}")
     print()
+
+    if extraction is not None:
+        _print_extraction_report(extraction)
 
     if result.device_class is None:
         print("Predicted classification: UNDETERMINED (no rule matched)")
@@ -112,15 +162,39 @@ def _print_report(device: DeviceAttributes, result: ClassificationResult) -> Non
             if outcome.ambiguous:
                 print(f"      JUDGEMENT CALL FLAGGED: {outcome.ambiguous_note}")
     print()
+
+    # Full transparency: show what every one of the 22 rules decided, not
+    # just the ones that applied - so a Class I result is visibly "we
+    # checked all 22 rules and only Rule 1's default applied," not a
+    # silent absence of information. See result.explanation above for the
+    # decisive rule(s); this is the complete audit trail behind it.
+    print("Full rule-by-rule breakdown (all 22 Annex VIII rules evaluated):")
+    decisive_ids = {o.rule_id for o in result.triggered_rules if o.device_class == result.device_class}
+    for outcome in result.all_rule_outcomes:
+        if outcome.applies and outcome.device_class is not None:
+            status = "DECISIVE" if outcome.rule_id in decisive_ids else "triggered, not decisive"
+            print(f"  {outcome.rule_id:<8} -> Class {outcome.device_class.value:<4} [{status}]")
+        else:
+            print(f"  {outcome.rule_id:<8} -> did not apply ({outcome.rationale})")
+    print()
     print(DISCLAIMER)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
+    input_group = parser.add_mutually_exclusive_group()
+    input_group.add_argument(
         "input",
         nargs="?",
         help="Path to a JSON file of device attributes. Omit or pass '-' to read JSON from stdin.",
+    )
+    input_group.add_argument(
+        "--text",
+        metavar="DESCRIPTION",
+        help=(
+            "A free-text device description to run through the default keyword "
+            "extractor instead of reading structured JSON."
+        ),
     )
     parser.add_argument(
         "--json",
@@ -129,30 +203,36 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.input and args.input != "-":
-        raw = Path(args.input).read_text(encoding="utf-8")
+    extraction: ExtractionResult | None = None
+
+    if args.text is not None:
+        extraction = KeywordExtractor().extract(args.text)
+        device = extraction.device
     else:
-        raw = sys.stdin.read()
+        if args.input and args.input != "-":
+            raw = Path(args.input).read_text(encoding="utf-8")
+        else:
+            raw = sys.stdin.read()
 
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        print(f"Invalid JSON input: {exc}", file=sys.stderr)
-        return 1
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            print(f"Invalid JSON input: {exc}", file=sys.stderr)
+            return 1
 
-    try:
-        device = device_attributes_from_dict(data)
-    except (ValueError, TypeError) as exc:
-        print(f"Invalid device attributes: {exc}", file=sys.stderr)
-        return 1
+        try:
+            device = device_attributes_from_dict(data)
+        except (ValueError, TypeError) as exc:
+            print(f"Invalid device attributes: {exc}", file=sys.stderr)
+            return 1
 
     engine = EUMDRClassificationEngine()
     result = engine.classify(device)
 
     if args.json:
-        print(json.dumps(_result_to_dict(device, result), indent=2))
+        print(json.dumps(_result_to_dict(device, result, extraction), indent=2))
     else:
-        _print_report(device, result)
+        _print_report(device, result, extraction)
 
     return 0
 

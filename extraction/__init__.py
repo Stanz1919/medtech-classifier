@@ -1,7 +1,13 @@
-"""Free-text -> DeviceAttributes extraction layer. Not implemented in Phase 1.
+"""Free-text -> DeviceAttributes extraction layer.
 
-Phase 2 will add a keyword/rule-based extractor as the default, with an
-optional LLM-based extractor as an upgrade path. Both will produce a
-``rules_engine.models.DeviceAttributes`` instance, so the rules engine
-never needs to know which extractor was used.
+``KeywordExtractor`` (in ``keyword_extractor.py``) is the default,
+deterministic extractor per the project brief - keyword/rule-based is
+the lead path, not a fallback. An LLM-based extractor is an optional
+future upgrade that would implement the same ``base.Extractor``
+interface.
 """
+
+from extraction.base import Extractor, ExtractionResult
+from extraction.keyword_extractor import KeywordExtractor
+
+__all__ = ["Extractor", "ExtractionResult", "KeywordExtractor"]
