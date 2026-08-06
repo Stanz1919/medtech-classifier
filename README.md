@@ -115,9 +115,9 @@ verification writeup and methodology):
 - **Rule 11** (software) severity tiering - **partially resolved**.
   Confirmed genuinely context-dependent (the same function can be a
   different class in ICU vs. home use) with real worked examples; still
-  flagged, and a separate implementation gap (Annex VIII 3.3, software
-  driving a device) was found and filed as a follow-up rather than
-  silently left alone.
+  flagged. Also surfaced a separate implementation gap - Annex VIII 3.3
+  ("software driving a device inherits its class") wasn't implemented -
+  which has since been fixed (`DeviceAttributes.drives_or_influences_device_class`).
 - **Rule 18**'s animal-tissue/intact-skin carve-out - **fully resolved**.
   The original "regulation doesn't say what class applies" assumption
   was simply wrong; guidance gives a direct answer (Class I via Rule 1).

@@ -204,6 +204,19 @@ class DeviceAttributes:
     is_active: bool = False  # Article 2(4)
     active_type: ActiveDeviceType = ActiveDeviceType.NOT_ACTIVE
     is_software: bool = False
+    # Annex VIII Chapter II, point 3.3 (a general implementing rule, not
+    # one of the 22 numbered rules): "Software, which drives a device or
+    # influences the use of a device, shall fall within the same class as
+    # the device. If the software is independent of any other device, it
+    # shall be classified in its own right." When this is set, Rule 11
+    # short-circuits to this class directly instead of evaluating its own
+    # decision-support/monitoring criteria - e.g. firmware driving a
+    # Class IIb infusion pump must be IIb, regardless of what Rule 11's
+    # own criteria would otherwise compute for the firmware in isolation.
+    # Leave as None for standalone software (the common case), which Rule
+    # 11 classifies in its own right as the regulation directs.
+    # See docs/CLARIFICATIONS_RULE_11.md.
+    drives_or_influences_device_class: Optional[DeviceClass] = None
 
     # --- Class I sub-qualifiers (Article 52(7)) ---
     placed_on_market_sterile: bool = False

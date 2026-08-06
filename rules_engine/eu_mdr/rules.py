@@ -801,12 +801,15 @@ class Rule11(ClassificationRule):
        entirely by Annex VIII Chapter II, point 3.3 ("Software, which
        drives a device or influences the use of a device, shall fall
        within the same class as the device") - MDCG's Note 3 restates
-       this. **This engine does not yet implement 3.3**: `Rule11` always
-       evaluates standalone-software criteria regardless of whether the
-       software drives another device. A firmware/embedded-software
-       device attached to, say, a Class IIb infusion pump should inherit
-       IIb via 3.3, not be re-derived from Rule 11's decision/monitoring
-       criteria. Flagged as a known gap - see docs/CLARIFICATIONS_RULE_11.md.
+       this. **Implemented**: when
+       ``device.drives_or_influences_device_class`` is set, this rule
+       short-circuits to that class directly (citing 3.3) instead of
+       evaluating its own decision-support/monitoring criteria - e.g.
+       firmware driving a Class IIb infusion pump inherits IIb, even if
+       Rule 11's own criteria would otherwise compute something else for
+       the firmware in isolation. This was a genuine gap found while
+       researching this rule (not present in Phase 1) - see
+       docs/CLARIFICATIONS_RULE_11.md.
     """
 
     rule_id = "Rule 11"
@@ -820,6 +823,31 @@ class Rule11(ClassificationRule):
                 device_class=None,
                 rationale="Device is not software; Rule 11 does not apply.",
                 source_citation=self.source_citation,
+            )
+
+        if device.drives_or_influences_device_class is not None:
+            # Annex VIII Chapter II, point 3.3 - not Rule 11 itself, but the
+            # implementing rule governing it: software driving or
+            # influencing another device inherits that device's class
+            # outright. Rule 11's own decision-support/monitoring criteria
+            # are not evaluated in this case.
+            driven_class = device.drives_or_influences_device_class
+            return RuleOutcome(
+                rule_id=self.rule_id,
+                applies=True,
+                device_class=driven_class,
+                rationale=(
+                    f"Software drives or influences the use of another "
+                    f"device; per Annex VIII Chapter II, point 3.3, it "
+                    f"inherits that device's class (Class {driven_class.value}) "
+                    f"rather than being independently classified under "
+                    f"Rule 11's decision-support/monitoring criteria."
+                ),
+                source_citation=(
+                    "Regulation (EU) 2017/745, Annex VIII, Chapter II, point 3.3"
+                    " (EUR-Lex CELEX:32017R0745); confirmed by MDCG 2021-24 Rev.1"
+                    " Note 3 to Rule 11, p. 47"
+                ),
             )
 
         decision_support = device.software_decision_impact != SoftwareDecisionImpact.NOT_APPLICABLE

@@ -277,6 +277,17 @@ CASES = [
         [],
     ),
     (
+        "Embedded firmware controlling a Class IIb infusion pump - inherits pump's class "
+        "(Annex VIII Chapter II, point 3.3, not evaluated under Rule 11's own criteria)",
+        {
+            "is_software": True,
+            "software_decision_impact": "other_impact",  # would be IIa if evaluated standalone
+            "drives_or_influences_device_class": "IIb",
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
         "Digital X-ray image recording device",
         {"is_xray_diagnostic_image_recording_device": True},
         DeviceClass.IIA,

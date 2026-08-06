@@ -95,7 +95,7 @@ an engine change: `None` (no rule matched) is arguably the right proxy
 for "not a device" already, as long as the extractor doesn't force
 `is_software=True` on things like pure diary apps.
 
-## A genuine implementation gap this research surfaced
+## A genuine implementation gap this research surfaced (now fixed)
 
 **Note 3** (MDCG 2021-24, p. 47), restating Annex VIII Chapter II, point
 3.3:
@@ -115,28 +115,39 @@ We already have the verbatim Annex VIII 3.3 text in
 > independent of any other device, it shall be classified in its own
 > right."
 
-**This is not implemented anywhere in the current engine.** `Rule11`
-always evaluates a software device against the standalone decision-
-support/monitoring criteria, regardless of whether that software drives
-a physical device. Concretely: firmware controlling a Class IIb infusion
-pump should inherit **IIb** via 3.3, not get re-derived from Rule 11's
-own criteria (which might independently compute something different,
-e.g. IIa if the firmware's own decision-support role seems low-risk in
-isolation).
+**This was not implemented anywhere in the engine when first found.**
+`Rule11` always evaluated a software device against the standalone
+decision-support/monitoring criteria, regardless of whether that
+software drives a physical device. Concretely: firmware controlling a
+Class IIb infusion pump should inherit **IIb** via 3.3, not get
+re-derived from Rule 11's own criteria (which might independently
+compute something different, e.g. IIa if the firmware's own
+decision-support role seems low-risk in isolation).
 
-This is a real gap, not a hypothetical one - it was found by reading the
-actual guidance, not invented. It was out of scope for "implement Rules
-1-22" (3.3 is a Chapter II implementing rule, not one of the 22
+This was a real gap, not a hypothetical one - it was found by reading
+the actual guidance, not invented. It was out of scope for "implement
+Rules 1-22" (3.3 is a Chapter II implementing rule, not one of the 22
 numbered rules), but it materially affects correctness for embedded/
-driving software. **Recommend addressing as a follow-up**, not silently
-left alone:
+driving software, so rather than leave it flagged indefinitely it was
+implemented as a follow-up:
 
-- Add a `DeviceAttributes` field (e.g. `drives_or_influences_device_class:
-  Optional[DeviceClass]`) that, when set, makes `Rule11` short-circuit to
-  that class directly, citing Annex VIII 3.3 rather than Rule 11's own
-  criteria.
-- Add a dedicated test: firmware driving a IIb pump → IIb, even when its
-  own decision-support attributes would otherwise compute IIa.
+- Added `DeviceAttributes.drives_or_influences_device_class:
+  Optional[DeviceClass]`. When set, `Rule11.evaluate()` short-circuits to
+  that class directly - citing Annex VIII 3.3 (and MDCG 2021-24's Note 3
+  confirming it) - instead of evaluating its own decision-support/
+  monitoring criteria at all. Left `None` (the default), Rule 11 behaves
+  exactly as before for standalone software.
+- Added `tests/test_rules_individual.py::test_rule11_software_driving_a_device_inherits_its_class`:
+  firmware with `software_decision_impact=OTHER_IMPACT` (which alone
+  would compute IIa) and `drives_or_influences_device_class=DeviceClass.IIB`
+  correctly returns IIb, not IIa - and asserts the outcome is not flagged
+  ambiguous, since 3.3's inheritance is mechanical, unlike Rule 11's own
+  severity tiering.
+- Added a regression test
+  (`test_rule11_standalone_software_unaffected_by_3_3_field_default`)
+  confirming the new field doesn't change behaviour when left unset.
+- Added a named ground-truth case to `tests/test_known_devices.py`
+  ("Embedded firmware controlling a Class IIb infusion pump").
 
 ## Summary
 
@@ -145,4 +156,5 @@ left alone:
 | Is severity tiering still a judgement call? | Yes - MDCG confirms it's genuinely context-dependent, not mechanical. Real examples now ground it. |
 | Are there real worked examples now in the test suite? | Yes - six MDCG-sourced examples added to `tests/test_known_devices.py`. |
 | Was MDCG 2019-11 (the deeper software guidance) verified? | No - only what MDCG 2021-24 quotes from it. Fetch and verify separately before citing it further. |
-| Was a new gap found? | Yes - Annex VIII 3.3 ("software driving a device inherits its class") is not implemented. Flagged for follow-up, not fixed in this pass. |
+| Was a new gap found? | Yes - Annex VIII 3.3 ("software driving a device inherits its class") was not implemented when this rule was first researched. |
+| Is it fixed now? | Yes - `Rule11` short-circuits via `drives_or_influences_device_class`; see `rules_engine/eu_mdr/rules.py` and the tests listed above. |

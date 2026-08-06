@@ -16,7 +16,7 @@ Each rule has its own detailed writeup:
 |---|---|---|
 | Rule 4 (wound contact) | [CLARIFICATIONS_RULE_4.md](CLARIFICATIONS_RULE_4.md) | **Resolved** - precedence confirmed correct; real ambiguity relocated to Phase 2 extraction |
 | Rule 8 (ancillary components) | [CLARIFICATIONS_RULE_8.md](CLARIFICATIONS_RULE_8.md) | **Partially resolved** - real examples found, but guidance confirms no blanket rule exists; also caught an unrelated dental-implant modelling risk |
-| Rule 11 (software severity) | [CLARIFICATIONS_RULE_11.md](CLARIFICATIONS_RULE_11.md) | **Partially resolved** - severity confirmed context-dependent with real examples; surfaced a separate, genuine implementation gap (Annex VIII 3.3, filed as [Task #15](#known-follow-ups)) |
+| Rule 11 (software severity) | [CLARIFICATIONS_RULE_11.md](CLARIFICATIONS_RULE_11.md) | **Partially resolved** - severity confirmed context-dependent with real examples; also surfaced a separate implementation gap (Annex VIII 3.3) which has since been implemented - see [Known follow-ups](#known-follow-ups) |
 | Rule 18 (animal tissue/intact skin) | [CLARIFICATIONS_RULE_18.md](CLARIFICATIONS_RULE_18.md) | **Fully resolved** - Phase 1's "regulatory gap" assumption was simply wrong; guidance gives a direct, citable answer |
 
 ## Verification methodology
@@ -78,24 +78,31 @@ appeared fully-formed on the first attempt.
 
 ## Known follow-ups
 
-Two items were surfaced by this research and deliberately **not** fixed
-inline, since they were out of scope for "verify the four flagged
-rules":
+One item was surfaced by this research, deliberately **not** fixed
+inline at the time (out of scope for "verify the four flagged rules"),
+and has since been implemented as a follow-up:
 
 1. **Annex VIII Chapter II, point 3.3** ("software which drives a device
    or influences the use of a device shall fall within the same class as
-   the device") is not implemented anywhere in this engine. Found while
-   reading MDCG 2021-24's Rule 11 section (its Note 3 restates 3.3
-   directly). See [CLARIFICATIONS_RULE_11.md](CLARIFICATIONS_RULE_11.md#a-genuine-implementation-gap-this-research-surfaced)
-   for the full writeup. Tracked as a task in the project's task list
-   ("Implement Annex VIII 3.3: software driving a device inherits its
-   class").
+   the device") was not implemented anywhere in this engine when found.
+   Discovered while reading MDCG 2021-24's Rule 11 section (its Note 3
+   restates 3.3 directly). **Now implemented**: `DeviceAttributes` gained
+   a `drives_or_influences_device_class` field that makes `Rule11`
+   short-circuit to the driven device's class, citing 3.3 directly. See
+   [CLARIFICATIONS_RULE_11.md](CLARIFICATIONS_RULE_11.md#a-genuine-implementation-gap-this-research-surfaced-now-fixed)
+   for the full writeup and tests.
+
+One item remains open:
+
 2. **Rule 8's "ancillary component" test** remains a genuine judgement
    call with no bright-line rule, per MDCG's own Note 1. The engine
    still flags this (`RuleOutcome.ambiguous`); Phase 2's extractor will
    need explicit guidance for how to populate `is_ancillary_component`
    (see the "What this means for Phase 2" section of
-   [CLARIFICATIONS_RULE_8.md](CLARIFICATIONS_RULE_8.md)).
+   [CLARIFICATIONS_RULE_8.md](CLARIFICATIONS_RULE_8.md)). This one is not
+   a code gap - the regulation and its guidance genuinely leave it to
+   case-by-case judgement - so there is nothing to "implement" beyond
+   giving the extractor good defaults when it's built.
 
 ## Where this leaves the rules engine
 

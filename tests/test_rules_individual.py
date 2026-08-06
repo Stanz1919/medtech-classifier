@@ -458,6 +458,34 @@ def test_rule11_monitoring_with_immediate_danger_is_class_iib():
     assert outcome.device_class == DeviceClass.IIB
 
 
+def test_rule11_software_driving_a_device_inherits_its_class():
+    """Annex VIII Chapter II, point 3.3: software that drives or
+    influences another device inherits that device's class outright.
+    Firmware driving a Class IIb infusion pump must be IIb, even though
+    its own decision-support attributes (OTHER_IMPACT) would otherwise
+    compute IIa under Rule 11's standalone criteria - 3.3 short-circuits
+    that evaluation entirely. See docs/CLARIFICATIONS_RULE_11.md."""
+    device = DeviceAttributes(
+        is_software=True,
+        software_decision_impact=SoftwareDecisionImpact.OTHER_IMPACT,  # would be IIa alone
+        drives_or_influences_device_class=DeviceClass.IIB,
+    )
+    outcome = Rule11().evaluate(device)
+    assert outcome.applies
+    assert outcome.device_class == DeviceClass.IIB
+    assert not outcome.ambiguous  # 3.3's inheritance is mechanical, not a judgement call
+    assert "3.3" in outcome.rationale
+
+
+def test_rule11_standalone_software_unaffected_by_3_3_field_default():
+    """Regression check: leaving drives_or_influences_device_class unset
+    (the default / common case) preserves Rule 11's normal standalone
+    behaviour."""
+    device = DeviceAttributes(is_software=True)
+    outcome = Rule11().evaluate(device)
+    assert outcome.device_class == DeviceClass.I
+
+
 # --- Rule 12 ---
 
 
