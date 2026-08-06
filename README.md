@@ -47,9 +47,12 @@ Their package directories exist as placeholders only.
 
 ## Regulatory grounding
 
-Every rule was written against text fetched directly from EUR-Lex
-(CELEX:32017R0745), saved verbatim in `docs/legal_sources/`:
+Every rule was written against text fetched directly from primary and
+official sources, saved verbatim in `docs/legal_sources/` - never
+reconstructed from memory:
 
+**EUR-Lex (the regulation itself, CELEX:32017R0745)**, retrieved
+2026-08-02:
 - `annex_viii_classification_rules.txt` - the full Annex VIII text
   (Chapter I definitions, Chapter II implementing rules including the
   3.5 precedence principle, Chapter III Rules 1-22).
@@ -60,7 +63,15 @@ Every rule was written against text fetched directly from EUR-Lex
   basis for classification itself (Article 51) and the informal
   Is/Im/Ir sub-qualifiers (Article 52(7)).
 
-Retrieved 2026-08-02.
+**MDCG 2021-24 Rev.1** (official guidance interpreting the above,
+published by the Medical Device Coordination Group), retrieved
+2026-08-04: `mdcg_2021-24_rule_*.txt` - worked examples and precedence
+clarifications for every one of the 22 rules, used both to verify the
+four originally-flagged ambiguous rules and to fill ground-truth test
+coverage for the rest. See **[docs/CLARIFICATIONS.md](docs/CLARIFICATIONS.md)**
+for the full verification writeup, including a documented correction
+where an earlier unverified pass cited a nonexistent source before this
+process was tightened up.
 
 ## Precedence logic
 
@@ -89,28 +100,39 @@ chosen - they are only computed and attached when the final class is I.
 
 The brief for this project explicitly asked not to force false
 confidence where the regulation's text does not resolve a question
-mechanically. Four places are flagged (`RuleOutcome.ambiguous`):
+mechanically. Four rules (4, 8, 11, 18) were originally flagged this way
+from the raw EUR-Lex text alone. Each was then checked against actual
+MDCG guidance (fetched, extracted, and cited with page numbers - see
+**[docs/CLARIFICATIONS.md](docs/CLARIFICATIONS.md)** for the full
+verification writeup and methodology):
 
-- **Rule 4** (contact with injured skin/mucous membrane) - drafted as a
-  parallel list of descriptive bullets rather than a base rule with
-  "unless" exceptions, so precedence between overlapping bullets is an
-  interpretive choice.
-- **Rule 8**'s "ancillary component" carve-out for joint replacements and
-  spinal implants - whether a specific part (e.g. a screw) is genuinely
-  "ancillary" versus a functional/load-bearing part of the implant is a
-  fact-specific judgement notified bodies routinely dispute.
-- **Rule 11** (software) severity tiering - classifying decision-support
-  software by the severity of harm it *could* cause is one of the most
-  contested areas of MDR classification in practice (see MDCG 2019-11).
-- **Rule 18**'s animal-tissue/intact-skin-only carve-out - the regulation
-  exempts this case from Rule 18 but does not say what class then
-  applies.
+- **Rule 4** (wound contact) - **resolved**. Official guidance confirms
+  this engine's "highest class wins" precedence is correct, not an
+  interpretive choice; the `ambiguous` flag was removed.
+- **Rule 8**'s "ancillary component" carve-out - **partially resolved**.
+  Real named examples exist (pedicle screws, spinal fixation hooks), but
+  guidance is explicit that there's no blanket rule - still flagged.
+- **Rule 11** (software) severity tiering - **partially resolved**.
+  Confirmed genuinely context-dependent (the same function can be a
+  different class in ICU vs. home use) with real worked examples; still
+  flagged, and a separate implementation gap (Annex VIII 3.3, software
+  driving a device) was found and filed as a follow-up rather than
+  silently left alone.
+- **Rule 18**'s animal-tissue/intact-skin carve-out - **fully resolved**.
+  The original "regulation doesn't say what class applies" assumption
+  was simply wrong; guidance gives a direct answer (Class I via Rule 1).
+  This was the largest correction of the four.
 
 A fifth case is documented but not flagged as ambiguous because it's a
 modelling choice rather than a legal one: `tests/test_known_devices.py`
 includes a worked example (ECG electrodes) showing a case where this
 engine's strict literal reading of Annex VIII diverges from a commonly
 published industry classification figure, and explains why.
+
+All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
+cases (147 tests total, 100% statement coverage on
+`rules_engine/eu_mdr/rules.py`) - see `docs/legal_sources/` for the
+retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
 
