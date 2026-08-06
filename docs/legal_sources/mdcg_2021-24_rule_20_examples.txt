@@ -1,0 +1,45 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 20 (pages 56-57 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 20 - Invasive devices, intended to administer medicinal product by inhalation
+General explanation of the rule
+This rule covers active and non-active medical devices with a respiratory route of drug delivery.
+In contrast to other rules covering devices that administer medicinal products, Rule 20 is also specifically intended to cover medical devices
+where the impact of the medical device on the efficacy and safety of the administered medicinal product is critical. The rule also covers drug-
+delivery products that are intended to treat life-threatening conditions.
+Class Rule 20 Examples
+IIa All invasive devices with respect to body orifices, other than surgically invasive devices, which • Spacer intended for metered dose inhalers
+are intended to administer medicinal products by inhalation are classified as class IIa, (attached to the inhaler) unless treating life-
+threatening conditions.
+• Inhalers for nicotine replacement therapy
+(nicotine not included)
+• Oxygen delivery system with a nasal cannula
+unless treating life-threatening conditions
+• Inhalers and nebulisers in case their mode of
+action has probably no essential impact on the
+efficacy and safety of the administered
+medicinal product or which are not intended to
+treat life-threatening conditions
+IIb unless their mode of action has an essential impact1 on the efficacy and safety of the • Nebulisers (not pre-charged with a specific
+administered medicinal product or they are intended to treat life- threatening conditions, in medicinal product) where the failure to deliver
+which case they are classified as class IIb the appropriate dosage characteristics could be
+hazardous
+56
+
+===PAGE 57===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+• Spacer intended for metered dose inhalers
+attached to the inhaler.
+Practical issues of classification
+Note 1. ‘Essential impact’ includes drug delivery systems where the device has a significant impact on factors that influence inhaled medicinal
+product deposition within the airways including inhalation flow, aerosol velocity, the particle size of the inhaled drug and the amount of drug
+reaching the patient.

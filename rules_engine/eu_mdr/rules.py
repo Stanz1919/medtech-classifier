@@ -195,6 +195,13 @@ class Rule3(ClassificationRule):
     human cells, tissues or organs taken from the human body or used in
     vitro with human embryos before their implantation or administration
     into the body are classified as class III." (Annex VIII, 4.3)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    30-31 (docs/legal_sources/mdcg_2021-24_rule_3_examples.txt): IIb -
+    haemodialysers, sperm-separation gradient media; IIa - particulate
+    blood filtration, blood centrifugation for (auto)transfusion, blood
+    warming/cooling in extracorporeal circulation; III - IVF/ART media
+    without human albumin, organ transport/perfusion/storage substances.
     """
 
     rule_id = "Rule 3"
@@ -706,6 +713,17 @@ class Rule10(ClassificationRule):
     devices which control or monitor such devices, or which directly
     influence their performance, are classified as class IIb."
     (Annex VIII, 6.2)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    44-45 (docs/legal_sources/mdcg_2021-24_rule_10_examples.txt): IIa -
+    MRI, diagnostic ultrasound, ECG/EEG, electronic thermometers/blood
+    pressure monitors; I - examination lamps, surgical illumination
+    microscopes; IIb - blood gas analysers in open-heart surgery, apnoea
+    monitors (incl. home use), ICU multi-parameter patient monitors,
+    diagnostic X-ray machines, CT scanners. MDCG's Note 3 is a useful
+    context-dependence rule of thumb: continuous vital-parameter
+    surveillance in anaesthesia/ICU/emergency care is IIb, while routine
+    checkup/self-monitoring readings of the same parameters are IIa.
     """
 
     rule_id = "Rule 10"
@@ -879,6 +897,13 @@ class Rule12(ClassificationRule):
     involved, of the part of the body concerned and of the mode of
     application in which case they are classified as class IIb."
     (Annex VIII, 6.4)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, page 48
+    (docs/legal_sources/mdcg_2021-24_rule_12_examples.txt): IIa -
+    suction pumps, feeding pumps, jet injectors for vaccination,
+    elastomeric/balloon infusion pumps; IIb - infusion pumps, ventilators,
+    anaesthesia machines, dialysis equipment, heart-lung machine blood
+    pumps, hyperbaric chambers.
     """
 
     rule_id = "Rule 12"
@@ -918,6 +943,11 @@ class Rule13(ClassificationRule):
     case. The extractor (or a human filling in the CLI harness) is
     responsible for only setting this bucket when Rules 9-12 genuinely do
     not describe the device.
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    48-49 (docs/legal_sources/mdcg_2021-24_rule_13_examples.txt): electric
+    wheelchairs, dental curing lights, electric hospital beds, patient
+    hoists, dental patient chairs - all Class I.
     """
 
     rule_id = "Rule 13"
@@ -948,6 +978,17 @@ class Rule14(ClassificationRule):
     including a medicinal product derived from human blood or human
     plasma..., and that has an action ancillary to that of the devices,
     are classified as class III." (Annex VIII, 7.1)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    49-50 (docs/legal_sources/mdcg_2021-24_rule_14_examples.txt): bone
+    cement with antibiotics, condoms with spermicide, heparin-coated
+    catheters, drug-eluting stents, IUDs containing copper or silver,
+    blood bags incorporating heparin. MDCG's own worked cross-rule
+    example: "IVF cell media with human albumin are in class III
+    according to Rule 14 and Rule 3. (Rule 14 applies, being the
+    strictest, according to MDR, Annex VIII, chapter II, point 3.5.)" -
+    direct confirmation this engine's cross-rule "highest wins" logic
+    matches official practice.
     """
 
     rule_id = "Rule 14"
@@ -1019,6 +1060,15 @@ class Rule16(ClassificationRule):
     are classified as class IIb. This rule does not apply to devices that
     are intended to clean devices other than contact lenses by means of
     physical action only." (Annex VIII, 7.3)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    51-52 (docs/legal_sources/mdcg_2021-24_rule_16_examples.txt): IIb -
+    contact lens storing solutions; IIa - disinfecting solutions for
+    non-invasive medical devices, sterilisers for medical devices in a
+    medical environment; IIb - washer-disinfectors for endoscopes/
+    invasive devices at end of processing, disinfectants for
+    haemodialysis fluid pathways; carve-out - brushes/ultrasonic devices
+    for mechanical cleaning of non-lens devices.
     """
 
     rule_id = "Rule 16"
@@ -1197,6 +1247,14 @@ class Rule20(ClassificationRule):
     safety of the administered medicinal product or they are intended to
     treat life-threatening conditions, in which case they are classified
     as class IIb." (Annex VIII, 7.7)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    56-57 (docs/legal_sources/mdcg_2021-24_rule_20_examples.txt): IIa -
+    inhalers for nicotine replacement therapy, oxygen delivery via nasal
+    cannula (non-life-threatening use), inhalers/nebulisers with no
+    essential impact on drug efficacy/safety; IIb - nebulisers (not
+    pre-charged with a specific medicinal product) where failure to
+    deliver correct dosage could be hazardous.
     """
 
     rule_id = "Rule 20"
@@ -1243,6 +1301,17 @@ class Rule21(ClassificationRule):
     cavity as far as the pharynx, and achieve their intended purpose on
     those cavities; and - class IIb in all other cases."
     (Annex VIII, 7.8)
+
+    Real worked examples confirmed against MDCG 2021-24 Rev.1, pages
+    57-58 (docs/legal_sources/mdcg_2021-24_rule_21_examples.txt): III -
+    systemically-absorbed fat absorbers, Na/Mg alginate acting in the
+    stomach/lower GI tract; IIa - saline nasal/throat sprays, oral cough
+    treatments acting only as far as the pharynx; IIb (catch-all) -
+    simethicone/activated-charcoal oral preparations, vaginal
+    moisturising gels, eye drops for hydration, ear drops (per MDCG's
+    Note 2, ear drops only reach the ear drum and act locally on skin,
+    so they are IIa - NOT the IIb catch-all - unless the ear drum is
+    perforated).
     """
 
     rule_id = "Rule 21"

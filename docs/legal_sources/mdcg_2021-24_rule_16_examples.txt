@@ -1,0 +1,53 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 16 (pages 51-52 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 16 - Specifically disinfecting, cleaning, rinsing, hydrating or sterilising devices
+General explanation of the rule
+This rule is intended to cover various products used specifically with contact lenses such as solutions intended for storing contact lenses and
+solutions used to support contact lenses placed on the ocular surface.
+The rule also covers substances and equipment specifically intended for the disinfection or sterilisation of devices intended by the manufacturer
+to be sterilised or disinfected prior to use, as referred to in MDR Article 2(1).
+This rule does not apply to physical means for the cleaning of medical devices, such as ultrasound and brushes for general use. Such products
+will only be medical devices if they are specifically intended for the cleaning, disinfection or sterilisation of medical devices. Devices specifically
+intended for physical cleaning of contact lenses are covered by this rule.
+51
+
+===PAGE 52===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+Class Rule 16 Examples
+IIb All devices intended specifically to be used for disinfecting, cleaning, rinsing or, where • Contact lens storing solutions
+appropriate, hydrating contact lenses are classified as class IIb. • Cleaners for contact lenses
+• Ultraviolet, vibration, or ultrasonic devices for
+cleaning and disinfecting contact lenses
+IIa All devices intended specifically to be used for disinfecting or sterilising medical devices are • Disinfecting solutions specifically intended for
+classified as class IIa, non-invasive medical devices
+• Washer-disinfectors intended specifically for
+disinfecting non-invasive medical devices
+• Sterilisers intended to sterilise medical devices
+(invasive or non-invasive) in a medical
+environment
+IIb unless they are disinfecting solutions or washer-disinfectors intended specifically to be used • Solutions/disinfectors for trans oesophageal
+for disinfecting invasive devices, as the end point of processing1, in which case they are ultrasound probes)
+classified as class IIb. • Washer-disinfector equipment specifically for
+disinfecting endoscopes or other invasive devices
+at the end point of processing (e. g. dental
+equipment)
+• Disinfectants for the fluid pathways of
+haemodialysis equipment
+• Denture disinfecting products
+! This rule does not apply to devices that are intended to clean devices other than contact • Brushes specifically intended to clean medical
+lenses by means of physical action only. devices by mechanical action
+• Ultrasonic devices (for other devices than contact
+lenses)
+Practical issues of classification
+Note 1: Including disinfecting solutions or washer-disinfectors that require no further processing for a disinfected device ready to be used. The
+rule also covers devices where the intended use is to disinfect prion contaminations.

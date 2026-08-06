@@ -54,6 +54,32 @@ def test_no_rule_applies_returns_none_and_explains():
     assert "Rule 1" in result.explanation
 
 
+def test_ancillary_medicinal_substance_overrides_lower_contraceptive_class():
+    """Real-world confirmation of cross-rule precedence, not just a
+    contrived example: MDCG 2021-24 Rev.1 (p. 50) gives its own worked
+    case of this exact mechanism - "IVF cell media with human albumin are
+    in class III according to Rule 14 and Rule 3. (Rule 14 applies, being
+    the strictest, according to MDR, Annex VIII, chapter II, point 3.5.)"
+    This test uses an equally real MDCG-named example pairing (Rule 14's
+    "condoms with spermicide" vs. Rule 15's baseline contraceptive
+    classification) to demonstrate the same mechanism: a condom alone is
+    IIb under Rule 15, but one incorporating spermicide (an ancillary
+    medicinal substance) is escalated to III under Rule 14, and the
+    engine must report III as decisive."""
+    device = DeviceAttributes(
+        contains_ancillary_medicinal_substance=True,
+        is_contraceptive_or_sti_prevention=True,
+    )
+    result = EUMDRClassificationEngine().classify(device)
+
+    assert result.device_class == DeviceClass.III
+    triggered_ids = {o.rule_id for o in result.triggered_rules}
+    assert "Rule 15" in triggered_ids  # still applies and is reported...
+    assert "Rule 14" in triggered_ids
+    deciding_ids = {o.rule_id for o in result.triggered_rules if o.device_class == DeviceClass.III}
+    assert deciding_ids == {"Rule 14"}  # ...but is not what decided the final class
+
+
 def test_ambiguous_flags_surface_in_final_result():
     # Rule 18's animal-tissue/intact-skin carve-out USED to be the example
     # here, but MDCG 2021-24 Note 3 resolved it explicitly (Class I) - see

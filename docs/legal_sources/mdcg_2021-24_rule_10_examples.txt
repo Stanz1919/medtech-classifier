@@ -1,0 +1,79 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 10 (pages 44-46 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Active devices for diagnosis and monitoring or intended for diagnostic or therapeutic radiology
+General explanation of the rule
+This rule covers a whole range equipment in various fields for capture of physiological signals, as well as specifically therapeutic and diagnostic
+radiology. Note that devices for recording diagnostic X-ray images are covered by Rule 17. Devices specifically intended to monitor active
+implantable devices fall under Rule 8 or Rule 9.
+Class Rule 10 Examples
+IIa Active devices intended for diagnosis and monitoring are classified as class IIa: • Magnetic resonance equipment
+- if they are intended to supply energy which will be absorbed by the human body, • Pulp testers
+• Evoked response stimulators
+• Diagnostic ultrasound
+I except for devices intended to illuminate1 the patient's body, in the visible spectrum, in which • Examination lamps
+case they are classified as class I; • Surgical microscopes intended to illuminate the
+patient’s body in the visible spectrum
+• Dermatoscopes with integrated light sources
+• Surgical lamps
+IIa - if they are intended to image in vivo distribution of radiopharmaceuticals; or • Gamma cameras
+• Positron emission tomography and single
+photon emission computer tomography
+IIa - if they are intended to allow direct diagnosis2 or monitoring of vital physiological processes3, • Electrocardiographs
+• Electroencephalographs
+• Electronic thermometers
+• Electronic stethoscopes
+• Electronic blood pressure measuring equipment
+• Devices for visual electrophysiology
+• Fundoscopes for examination of the eye
+IIb unless they are specifically intended for monitoring of vital physiological parameters3 and the • Blood gas analysers used in open heart surgery
+nature of variations of those parameters is such that it could result in immediate danger to • Apnoea monitors, including apnoea monitors in
+the patient, for instance variations in cardiac performance, respiration, activity of the central home care
+nervous system, or they are intended for diagnosis in clinical situations where the patient is • Patient monitors (intended use: Monitor
+in immediate danger, in which cases they are classified as class IIb. intended for multi-parameter patient
+monitoring. The device will produce visual and
+audible alarms if any of the physiological
+44
+
+===PAGE 45===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+parameters monitored vary beyond pre-set
+limits and timed alarm recordings will be
+produced.), for example in intensive care
+monitoring, e.g. blood pressure, temperature,
+oxygen saturation
+IIb Active devices intended to emit ionizing radiation4 and intended for diagnostic or • Diagnostic X-Ray machine
+therapeutic radiology5, including interventional radiology devices5 and devices which • Computed Tomography Devices
+control or monitor6 such devices, or which directly influence their performance, are
+classified as class IIb.
+Practical issues of classification / Explanation of special concepts
+Note 1: ‘Illuminate’ means: to administer rays in visible light spectrum to for use in the process of diagnosis for example in visual
+electrophysiology and eye diseases, and not just to cast a light to improve the visibility. When performing diagnosis such as visual
+electrophysiology in search of eye diseases, the intended purpose of the device may not be limited to ‘illumination’.
+Note 2: A device is considered to allow direct diagnosis when it itself provides the diagnosis of the disease or condition in question or when it
+provides decisive information for the diagnosis (MDR 2017/745, Annex VIII, 3.7). For the definition of diagnosis see the MDCG Guidance
+document covering the borderline between medical devices and medicinal products.
+Note 3: Vital physiological processes and parameters include, for example, respiration, heart rate, cerebral functions, blood gases, blood
+pressure and body temperature. Medical devices intended to be used for continuous surveillance of vital physiological parameters in anesthesia,
+intensive care or emergency care are in class IIb, whilst medical devices intended to be used to obtain readings of vital physiological signals as
+part of routine checkups or self-monitoring are in class IIa. A thermal imaging device intended to monitor blood flow is not considered to be a
+body temperature measuring device.
+Note 4: ‘Ionising radiation’ means energy transferred in the form of particles or electromagnetic waves of a wavelength of 100 nanometers or
+less (a frequency of 3 × 1015 hertz or more) capable of producing ions directly or indirectly (Directive 2013/59/EURATOM, Article 4, 46).
+Note 5: Therapeutic interventional radiology refers to diagnosis being carried out during a surgical procedure.
+Note 6: This refers to active devices for the control, monitoring or influencing the emission of ionizing radiation and not to the subsequent
+processing, recording or viewing of the resulting image. Devices for recording diagnostic X-ray images are covered by Rule 17.
+45
+
+===PAGE 46===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1

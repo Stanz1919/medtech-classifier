@@ -1,0 +1,41 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 12 (pages 48 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 12 - Active devices intended to administer and/or remove medicinal products, body liquids or other
+substances to or from the body
+General explanation of the rule
+This rule is intended to primarily cover drug delivery systems and anaesthesia equipment. If the device’s intended route of drug delivery is
+pulmonary, Rule 20 applies.
+Class Rule 12 Examples
+IIa All active devices intended to administer and/or remove medicinal products, body liquids or • Suction pump
+other substances to or from the body are classified as class IIa, • Feeding pumps
+• Jet injectors for vaccination
+• Elastomeric pumps or balloon pumps for infusion
+IIb unless this is done in a manner that is potentially hazardous, taking account of the nature of • Infusion pumps
+the substances involved, of the part of the body concerned and of the mode of application in • Ventilators
+which case they are classified as class IIb. • Anaesthesia machines
+• Anaesthetic vaporisers
+• Dialysis equipment
+• Blood pumps for heart-lung machines
+• Hyperbaric chambers
+• Pressure regulators for medical gases with
+integrated flowmeter
+• Medical gas mixers
+• Moisture exchangers in breathing circuits if used
+on unconscious or non-spontaneously breathing
+patients
+• Oxygen concentrator used to deliver oxygen
+enriched air directly to the patient
+48
+
+===PAGE 49===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1

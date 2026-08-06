@@ -1,0 +1,58 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 14 (pages 49-50 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 14 - Devices incorporating, as an integral part, an ancillary medicinal product, and medicinal products
+derived from human blood or blood plasma
+General explanation of the rule
+This rule covers those devices incorporating, as an integral part, a substance which, if used separately, can be considered to be a medicinal product,
+with an action ancillary to that of the device. The principal intended action of the device must not be achieved through a pharmacological,
+immunological or metabolic action of the incorporated medicinal substance1. If the principal intended action of the device is mainly achieved by
+the action of the medicinal substance, the integral product shall be governed by Directive 2001/83/EC or Regulation (EC) No 726/2004 of the
+European Parliament and of the Council, as applicable. For more information see the MDCG Guidance document covering the borderline between
+medical devices and medicinal products. The same principle applies if a substance of animal origin, as defined in Art. 2(17), is part of the device
+and has an action ancillary to that of a device.
+49
+
+===PAGE 50===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+Class Rule 14 examples
+III All devices incorporating, as an integral part, a substance which, if used separately, can be • Bone cement with antibiotics
+considered to be a medicinal product, as defined in point 2 of Article 1 of Directive • Condoms with spermicide
+2001/83/EC, including a medicinal product derived from human blood or human plasma, as • Catheters coated with anticoagulants (e. g. heparin)
+defined in point 10 of Article 1 of that Directive, and that has an action ancillary to that of the • Endodontic materials with antibiotics
+devices, are classified as class III. • Ophthalmic irrigation solutions principally
+intended for irrigation, which contain
+components supporting the metabolism of the
+endothelial cells of the cornea
+• Dressings incorporating an antimicrobial agent
+where the agent has an ancillary action on the
+wound
+• Drug eluting stents (e.g. coronary, pulmonary)
+• Surgical sealants containing human serum
+albumin or thrombin
+• Implants coated with human fibrinogen
+• Blood bags incorporating heparin or other
+substances as anticoagulant agents which, if
+used separately, can be considered to be a
+medicinal product
+• IVF cell media with human albumin2
+• Intra Uterine Devices (IUD) containing medicinal
+substances3 including copper or silver
+• Catheter lubrication gels containing analgesia
+e.g. lidocaine
+Practical issues of classification
+Note 1: The definition of ‘substance’ in Article 1 (3) of Directive 2001/83/EC is applicable as far as not excluded by the MDR (e. g. exclusion
+criteria Article 1 (6) (h)).
+Note 2: IVF cell media with human albumin are in class III according to Rule 14 and Rule 3. (Rule 14 applies, being the strictest, according to
+MDR, Annex VIII, chapter II, point 3.5.)
+Note 3: This only applies if the effect of the medicinal substance is ancillary – if it is the main effect, the IUD would be classified as a medicinal
+product

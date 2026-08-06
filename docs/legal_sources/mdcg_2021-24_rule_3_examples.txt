@@ -1,0 +1,56 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 3 (pages 30-31 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+CG 2021- 24 Rev.1
+Rule 3 Devices that modify biological or chemical composition of human tissues or cells, blood, other body
+liquids or other liquids intended for implantation or administration into the body
+General explanation of the rule
+These types of devices must be considered separately from the non-contact devices of Rule 1 because they are indirectly invasive. They modify
+substances that will eventually be administered into the body. This rule covers mostly the more sophisticated elements of extracorporeal
+circulation sets, dialysis systems and autotransfusion systems as well as devices for extracorporeal treatment of body fluids which may or may
+not be immediately reintroduced into the body, including cases where the patient is not in a closed loop with the device.
+This rule covers also substances in direct contact with human cells, tissues or organs in vitro before their implantation or administration, without
+substances derived from human or animal origin such as human albumin.
+Class Rule 3 Examples
+IIb All non-invasive devices intended for modifying the biological or chemical composition of human • Devices intended to remove undesirable
+tissues or cells, blood, other body liquids or other liquids intended for implantation or substances out of the blood by exchange of
+administration into the body are classified as class IIb, solutes such as hemodialysers
+• Devices intended to separate cells by physical
+means, e.g. gradient medium for sperm
+separation
+• Haemodialysis concentrates
+• Device removing specific blood cells (e.g.
+activated) by specific binding to a matrix
+IIa unless the treatment for which the device is used consists of filtration, centrifugation or • Particulate filtration of blood in an
+exchanges of gas, heat, in which case they are classified as class IIa extracorporeal circulation system. These are
+used to remove particles from the blood
+• Centrifugation of blood to prepare it for
+transfusion or autotransfusion excluding
+centrifuges for manufacturing a medicinal
+product
+• Removal of carbon dioxide from the blood
+and/or adding oxygen
+• Warming or cooling the blood in an
+extracorporeal circulation system.
+III All non-invasive devices consisting of a substance or a mixture of substances intended to be • Substances or mixture of substances for
+used in vitro in direct contact with human cells, tissues or organs taken from the human body transport, perfusion, storage of organs intended
+or used in vitro with human embryos before their implantation or administration into the body for transplantation that do not achieve the
+are classified as class III. principal intended action by pharmacological,
+immunological or metabolic means
+31
+
+===PAGE 32===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+• IVF or ART products without principal
+pharmacological/metabolic action (substances
+or mixture of substances)
+• IVF cell media without human albumin

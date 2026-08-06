@@ -1,0 +1,21 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 13 (pages 48-49 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 13 - All other active devices
+General explanation of the rule
+This is a fallback rule to cover all active devices not covered by other rules.
+Class Rule 13 Examples
+I All other active devices are classified as class I. • Electric wheelchairs
+• Dental curing lights
+• Electric hospital beds
+• Patient hoists
+• Dental patient chairs
+Special rules

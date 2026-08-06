@@ -1,0 +1,77 @@
+Source: MDCG 2021-24 Rev.1, "Guidance on classification of medical devices"
+Published by: Medical Device Coordination Group (Article 103, Regulation (EU) 2017/745)
+Retrieved from: https://health.ec.europa.eu/system/files/2021-10/mdcg_2021-24_en_0.pdf
+Retrieved on: 2026-08-04
+Section extracted: Rule 21 (pages 57-58 of the source PDF)
+NOTE: This is MDCG GUIDANCE, not legally binding regulation. Per the document itself: "The document is
+not a European Commission document, and it cannot be regarded as reflecting the official position of
+the European Commission. Any views expressed in this document are not legally binding and only the
+Court of Justice of the European Union can give binding interpretations of Union law."
+================================================================================
+
+Rule 21 Devices composed of substances that are introduced via a body orifice or applied to the skin
+General explanation of the rule
+This rule covers a wide range of exclusively substance-based medical devices. In this context, ‘substance’ means any matter that is part of the
+medical device, including those according to the definition of ‘substance’ in Article 1(3) of Directive 2001/83/EC. This is provided that they are
+not excluded by the MDR (e.g. exclusion criteria in article 1 (6) (h)). The specific medical purpose is specified by the manufacturer from those
+listed in the indents of Article 2(1) MDR.
+Importantly, if the principal intended action of such substance-based medical devices is achieved or supported by pharmacological,
+immunological or metabolic means, Directive 2001/83/EC or Regulation (EC) No 726/2004 or Rule 14 has to be applied to the product,
+respectively.
+The classification takes into account the site of application of the medical device as well as the site where the medical device performs its action
+in or on the human body. For the purpose of this rule nails are also considered as falling under ‘skin’.
+Manufacturers of substance-based devices should provide clear information supporting the mode of action through which the substance achieves
+the intended specific medical purpose as a basis for the application of this rule, including the site of application as well as the site where the
+action is achieved in or on the body.
+Class Rule 21 Examples
+III Devices that are composed of substances or of combinations of substances that are intended to be
+introduced into the human body via a body orifice or applied to the skin and that are absorbed by or
+locally dispersed in the human body are classified as:
+— class III if they, or their products of metabolism, are systemically absorbed by the human body in
+order to achieve the intended purpose;
+III — class III if they achieve their intended purpose in the stomach or lower gastrointestinal tract and • Na/Mg alginate, xyloglucan
+they, or their products of metabolism, are systemically absorbed by the human body;
+57
+
+===PAGE 58===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1
+• Fat absorbers that are systemically
+absorbed, themselves or their metabolites
+IIa — class IIa if they are applied to the skin or if they are applied in the nasal or oral cavity as far as • Substance-based formulations for skin
+the pharynx1, and achieve their intended purpose on those cavities; and treatment
+• Salt water used e.g. as nose or throat
+sprays
+• Oral cough treatments achieving their
+intended purpose in the oral cavity as far
+as the pharynx
+IIb — class IIb in all other cases. • Simethicone preparations for oral
+administration
+• Active coal for oral administration
+• Gel for vaginal moisturizing / vaginal
+lubricants
+• Eye drops for hydration
+• Ear drops1, 2
+• Medical devices, for oral administration,
+for the treatment of diarrhoea, e.g. kaolin,
+diosmectite
+• Medical devices, for oral administration,
+for the treatment of obesity, e.g.
+fructooligosaccharides, glucomannan
+Practical issues of classification
+Products acting in the nasal or oral cavity may be to some extent be ingested or inhaled. These products will be class IIa devices if the products
+achieve their intended purpose solely in these cavities, and not in the respiratory tract, stomach or lower gastrointestinal tract.
+N.B.: examples provided do not imply that the products are a priori qualified as devices. Classification rules apply after the qualification of the
+device has been established.
+Note 1: There is a normal anatomical connection, the Eustachian tube, from the middle ear to the nasopharynx. If the Eustachian tube was to
+be accessed from the nasopharynx direction, this would be considered beyond the pharynx, so this does not fulfil the criteria of ‘as far as the
+pharynx’.
+Note 2: In the majority of cases the drops would only enter the ear as far as the ear drum. This is regarded as applied to the skin. The outer
+layer of the tympanic membrane is epithelium, so if there is an intact tympanic membrane, then the drops are applied only to the skin and has
+its action locally, and consequently the device would be class IIa. This will be the case unless the ear drum (tympanic membrane) is perforated
+and the product is intended to be used on perforated ear drums.
+58
+
+===PAGE 59===
+Medical Devices
+Medical Device Coordination Group Document MDCG 2021- 24 Rev.1

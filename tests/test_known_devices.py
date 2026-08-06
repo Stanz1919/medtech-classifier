@@ -456,6 +456,229 @@ CASES = [
         DeviceClass.I,
         [ClassQualifier.STERILE, ClassQualifier.REUSABLE_SURGICAL_INSTRUMENT],
     ),
+    # =========================================================================
+    # The following cases fill the "gap rules" identified in PHASE_2_ROADMAP.md
+    # (Rules 3, 10, 12, 13, 14, 16, 20, 21 previously had unit-test coverage
+    # but no realistic device exercising them end-to-end). All examples below
+    # are named verbatim in MDCG 2021-24 Rev.1's worked-examples tables - see
+    # the cited page numbers and docs/legal_sources/mdcg_2021-24_rule_*.txt.
+    # =========================================================================
+    # --- Rule 3 (MDCG 2021-24, pages 30-31) ---
+    (
+        "Haemodialyser removing blood solutes by exchange (MDCG 2021-24 Rule 3 named example, Class IIb)",
+        {
+            "invasiveness": "non_invasive",
+            "modifies_biological_or_chemical_composition": True,
+            "modification_treatment_type": "other",
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Particulate blood filtration in an extracorporeal circulation system "
+        "(MDCG 2021-24 Rule 3 named example, Class IIa)",
+        {
+            "invasiveness": "non_invasive",
+            "modifies_biological_or_chemical_composition": True,
+            "modification_treatment_type": "filtration_centrifugation_gas_or_heat_exchange",
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "IVF cell media without human albumin (MDCG 2021-24 Rule 3 named example, Class III)",
+        {"invasiveness": "non_invasive", "in_vitro_direct_contact_with_cells_tissues_organs_or_embryos": True},
+        DeviceClass.III,
+        [],
+    ),
+    # --- Rule 10 (MDCG 2021-24, pages 44-45) ---
+    (
+        "Diagnostic ultrasound equipment (MDCG 2021-24 Rule 10 named example, Class IIa)",
+        {
+            "is_active": True,
+            "active_type": "diagnostic_monitoring",
+            "diagnostic_supplies_energy_absorbed_by_body": True,
+            "diagnostic_illuminates_patient_visible_spectrum_only": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Examination lamp - illumination only (MDCG 2021-24 Rule 10 named example, Class I)",
+        {
+            "is_active": True,
+            "active_type": "diagnostic_monitoring",
+            "diagnostic_supplies_energy_absorbed_by_body": True,
+            "diagnostic_illuminates_patient_visible_spectrum_only": True,
+        },
+        DeviceClass.I,
+        [],
+    ),
+    (
+        "Electrocardiograph for routine use (MDCG 2021-24 Rule 10 named example, Class IIa)",
+        {
+            "is_active": True,
+            "active_type": "diagnostic_monitoring",
+            "diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes": True,
+            "diagnostic_variation_could_cause_immediate_danger": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "ICU multi-parameter patient monitor (MDCG 2021-24 Rule 10 named example, Class IIb)",
+        {
+            "is_active": True,
+            "active_type": "diagnostic_monitoring",
+            "diagnostic_allows_direct_diagnosis_or_monitoring_of_vital_physiological_processes": True,
+            "diagnostic_variation_could_cause_immediate_danger": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Diagnostic CT scanner (MDCG 2021-24 Rule 10 named example, Class IIb)",
+        {"is_active": True, "emits_ionising_radiation_diagnostic_or_interventional": True},
+        DeviceClass.IIB,
+        [],
+    ),
+    # --- Rule 12 (MDCG 2021-24, page 48) ---
+    (
+        "Suction pump, routine use (MDCG 2021-24 Rule 12 named example, Class IIa)",
+        {
+            "is_active": True,
+            "administers_or_removes_substances_to_from_body": True,
+            "administration_or_removal_potentially_hazardous": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Anaesthesia machine (MDCG 2021-24 Rule 12 named example, Class IIb)",
+        {
+            "is_active": True,
+            "administers_or_removes_substances_to_from_body": True,
+            "administration_or_removal_potentially_hazardous": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    # --- Rule 13 (MDCG 2021-24, pages 48-49) ---
+    (
+        "Electric wheelchair (MDCG 2021-24 Rule 13 named example, Class I)",
+        {"is_active": True, "active_type": "other_active"},
+        DeviceClass.I,
+        [],
+    ),
+    (
+        "Dental curing light (MDCG 2021-24 Rule 13 named example, Class I)",
+        {"is_active": True, "active_type": "other_active"},
+        DeviceClass.I,
+        [],
+    ),
+    # --- Rule 14 (MDCG 2021-24, pages 49-50) ---
+    (
+        "Bone cement with antibiotics (MDCG 2021-24 Rule 14 named example, Class III)",
+        {"contains_ancillary_medicinal_substance": True},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Condom with spermicide - Rule 14 overrides Rule 15's IIb "
+        "(MDCG 2021-24 Rule 14 named example, Class III)",
+        {"contains_ancillary_medicinal_substance": True, "is_contraceptive_or_sti_prevention": True},
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Drug-eluting coronary stent (MDCG 2021-24 Rule 14 named example, Class III)",
+        {
+            "contains_ancillary_medicinal_substance": True,
+            "is_implantable": True,
+            "contacts_heart_or_central_circulatory_system": True,
+        },
+        DeviceClass.III,
+        [],
+    ),
+    # --- Rule 16 (MDCG 2021-24, pages 51-52) ---
+    (
+        "Contact lens storing solution (MDCG 2021-24 Rule 16 named example, Class IIb)",
+        {"disinfect_clean_target": "contact_lenses"},
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Disinfecting solution for non-invasive medical devices (MDCG 2021-24 Rule 16 named example, Class IIa)",
+        {"disinfect_clean_target": "other_medical_device"},
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Washer-disinfector for endoscopes at end of processing (MDCG 2021-24 Rule 16 named example, Class IIb)",
+        {"disinfect_clean_target": "invasive_device_end_point"},
+        DeviceClass.IIB,
+        [],
+    ),
+    (
+        "Brush for mechanical cleaning of non-lens devices - carve-out, falls to Rule 1 "
+        "(MDCG 2021-24 Rule 16 named example, Class I)",
+        {"invasiveness": "non_invasive", "disinfect_clean_target": "physical_action_only_non_lens"},
+        DeviceClass.I,
+        [],
+    ),
+    # --- Rule 20 (MDCG 2021-24, pages 56-57) ---
+    (
+        "Inhaler for nicotine replacement therapy (MDCG 2021-24 Rule 20 named example, Class IIa)",
+        {
+            "invasiveness": "invasive_body_orifice",
+            "administers_medicinal_product_by_inhalation": True,
+            "inhalation_essential_impact_or_life_threatening": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Nebuliser where dosage-delivery failure could be hazardous "
+        "(MDCG 2021-24 Rule 20 named example, Class IIb)",
+        {
+            "invasiveness": "invasive_body_orifice",
+            "administers_medicinal_product_by_inhalation": True,
+            "inhalation_essential_impact_or_life_threatening": True,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
+    # --- Rule 21 (MDCG 2021-24, pages 57-58) ---
+    (
+        "Fat absorber, systemically absorbed (MDCG 2021-24 Rule 21 named example, Class III)",
+        {
+            "composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin": True,
+            "systemically_absorbed": True,
+        },
+        DeviceClass.III,
+        [],
+    ),
+    (
+        "Saline nasal/throat spray, local action only (MDCG 2021-24 Rule 21 named example, Class IIa)",
+        {
+            "composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin": True,
+            "applied_to_skin_or_nasal_oral_cavity_to_pharynx": True,
+            "systemically_absorbed": False,
+        },
+        DeviceClass.IIA,
+        [],
+    ),
+    (
+        "Vaginal moisturising gel/lubricant - catch-all case "
+        "(MDCG 2021-24 Rule 21 named example, Class IIb)",
+        {
+            "composed_of_substances_absorbed_or_dispersed_via_orifice_or_skin": True,
+            "applied_to_skin_or_nasal_oral_cavity_to_pharynx": False,
+            "systemically_absorbed": False,
+        },
+        DeviceClass.IIB,
+        [],
+    ),
 ]
 
 
