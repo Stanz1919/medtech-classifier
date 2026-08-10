@@ -9,6 +9,13 @@ description = "Educational EU MDR 2017/745 medical device regulatory classificat
 requires-python = ">=3.10"
 readme = "README.md"
 
+[project.optional-dependencies]
+# rules_engine / extraction / standards_mapper / cli.py use nothing
+# outside the standard library - both groups below are purely for the
+# dev/demo tooling around them.
+dev = ["pytest", "coverage"]
+ui = ["streamlit>=1.61"]
+
 [tool.setuptools.packages.find]
 include = ["rules_engine*", "extraction*", "standards_mapper*", "ui*"]
 

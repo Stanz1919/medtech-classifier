@@ -1,0 +1,17 @@
+# Streamlit theme for the MedTech Device Regulatory Classifier UI.
+# Sets a clean, professional default; native components (st.badge,
+# st.metric, st.dataframe, st.info/warning/error) still re-theme
+# correctly if a viewer manually switches to dark mode - see
+# ui/render.py's module docstring for why the risk-ladder badges are
+# built on st.badge rather than custom CSS.
+
+[theme]
+base = "light"
+primaryColor = "#0B5FA5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F1F5F8"
+textColor = "#111827"
+font = "sans serif"
+
+[server]
+headless = true

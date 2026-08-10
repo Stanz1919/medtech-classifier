@@ -137,8 +137,63 @@ judgement.
   in both the human-readable report and `--json` output, for both input
   modes (structured JSON and `--text`) - no extra flag needed.
 
-**Not yet built**: the Streamlit UI (`ui/`). Its package directory exists
-as a placeholder only.
+## Phase 4: Streamlit UI (done)
+
+- `ui/app.py` - the entry point (`streamlit run ui/app.py`). Owns layout
+  and input handling only; a **sibling front-end to `cli.py`**, not
+  dependent on it - both sit on top of the same three core packages
+  (`rules_engine`, `extraction`, `standards_mapper`) and know nothing
+  about each other. The classification and standards-mapping logic is
+  byte-for-byte identical to the CLI's; this file only presents it.
+- `ui/render.py` - the display helpers `app.py` calls, each a pure
+  function of one core dataclass (`ClassificationResult` /
+  `ExtractionResult` / `StandardsMappingResult`) - kept separate from
+  `app.py` so layout/input concerns don't tangle with display concerns.
+- `ui/examples.py` - the curated demo data (8 free-text examples spanning
+  the full risk ladder, plus every JSON file in `examples/`), kept in its
+  own side-effect-free module on purpose: `ui/app.py` is a real Streamlit
+  script, and importing it directly (rather than running it via
+  `streamlit run` or `AppTest`) executes its interactive flow outside a
+  real session and crashes - a real bug this project's own test suite
+  caught (see `tests/test_ui.py`'s module docstring).
+- **Same two input modes as the CLI**: free text (recommended, runs the
+  keyword extractor first) or structured JSON (advanced, bypasses
+  extraction). A "try an example" dropdown in each mode - the free-text
+  set is chosen to also demonstrate the extractor's most distinctive
+  documented behaviour: the Rule 6/Rule 8 routing fixes from Phase 2, and
+  the clarifying-questions design for software severity (the heartbeat
+  app example that motivated it in the first place).
+- **Same full-transparency principle**, adapted to a browser instead of
+  a scrolling terminal: a compact table of all 22 rules / all 14 GSPR
+  categories by default, full rationale and citations one click away in
+  an expander rather than one long unbroken dump of text.
+- **Risk-ladder color coding** via Streamlit's native `st.badge`
+  (green -> yellow -> orange -> red for Class I -> IIa -> IIb -> III) -
+  deliberately built on native, theme-aware components rather than
+  custom CSS, so it re-themes correctly if a viewer switches to dark
+  mode without this project having to hand-roll that.
+- **Defensive by design for a public-facing demo**: invalid JSON,
+  unknown `DeviceAttributes` fields, and genuinely undetermined
+  classifications (no Annex VIII rule matched) all show a plain-language
+  error, never a raw traceback - checked directly in `tests/test_ui.py`,
+  including a case that forces an unexpected exception via mocking to
+  confirm the defensive net actually works, not just that it exists.
+- Tested with Streamlit's own `streamlit.testing.v1.AppTest` harness
+  (runs the real app script in a simulated session, no browser needed) -
+  100% statement coverage across `ui/app.py`, `ui/render.py` and
+  `ui/examples.py`.
+
+**Run locally:**
+
+```bash
+pip install -e ".[ui]"
+streamlit run ui/app.py
+```
+
+**Deploy:** point [Streamlit Community Cloud](https://streamlit.io/cloud)
+(free) at this repo with main file path `ui/app.py` - `requirements.txt`
+at the repo root is picked up with no further config. `.streamlit/config.toml`
+sets a clean default theme.
 
 ## Regulatory grounding
 
@@ -236,15 +291,15 @@ published industry classification figure, and explains why.
 
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
 cases, and `rules_engine/eu_mdr/rules.py`, `extraction/keyword_extractor.py`,
-and `standards_mapper/eu_mdr/` (requirements + mapper) all sit at 100%
-statement coverage (297 tests total) - see `docs/legal_sources/` for the
-retrieved source excerpts behind every citation in this codebase.
+`standards_mapper/eu_mdr/` (requirements + mapper), and `ui/` all sit at
+100% statement coverage (318 tests total) - see `docs/legal_sources/` for
+the retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
 
 ```bash
-pip install -e .
-pip install pytest coverage   # dev dependencies, not yet pinned in pyproject
+pip install -e ".[dev]"    # pytest, coverage
+pip install -e ".[ui]"     # streamlit, for the Phase 4 UI below
 
 # Structured input (Phase 1) - bypasses extraction entirely
 python cli.py examples/hip_implant.json
@@ -258,6 +313,9 @@ python cli.py --text "A titanium hip replacement implant intended for permanent 
 # Both commands above also print a Phase 3 standards mapping section
 # automatically (which GSPR categories apply, and the standard(s)
 # commonly used to demonstrate conformity with each) - no extra flag.
+
+# Phase 4 - the same engine, in a browser
+streamlit run ui/app.py
 
 # Run the tests
 python -m pytest tests/ -v
@@ -286,9 +344,14 @@ standards_mapper/
   eu_mdr/
     requirements.py    14 GSPR requirement categories
     mapper.py           EUMDRStandardsMapper
+ui/
+  app.py               Streamlit entry point (streamlit run ui/app.py)
+  render.py            Display helpers app.py calls
+  examples.py          Curated demo data (no Streamlit import - see Phase 4 above)
 cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  297 unit tests
+tests/                  318 unit tests
 docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
-ui/                     Phase 4 placeholder (Streamlit)
+requirements.txt        For Streamlit Community Cloud's zero-config deploy
+.streamlit/config.toml  UI theme
 ```
