@@ -14,6 +14,13 @@ Two input modes:
      silently guessing. See docs/CLARIFICATIONS.md for the extractor's
      documented coverage and limitations.
 
+Both modes then run the classified device through the Phase 3 standards
+mapper (standards_mapper.eu_mdr), which reports every General Safety and
+Performance Requirement (GSPR) category checked - not just the ones that
+apply - and the standard(s) commonly used to demonstrate conformity with
+each. See standards_mapper/base.py for why these are named as "commonly
+used" rather than asserted to be formally EU-harmonised.
+
 Usage:
     python cli.py examples/hip_implant.json
     python cli.py < examples/hip_implant.json
@@ -35,6 +42,8 @@ from extraction.base import ExtractionResult
 from extraction.keyword_extractor import KeywordExtractor
 from rules_engine.eu_mdr.engine import EUMDRClassificationEngine
 from rules_engine.models import ClassificationResult, DeviceAttributes, RuleOutcome
+from standards_mapper.base import GSPRRequirement, StandardsMappingResult
+from standards_mapper.eu_mdr.mapper import EUMDRStandardsMapper
 
 DISCLAIMER = (
     "This is an educational/demonstration tool, not real regulatory or "
@@ -97,10 +106,59 @@ def _extraction_to_dict(extraction: ExtractionResult) -> dict:
     }
 
 
+def _requirement_to_dict(requirement: GSPRRequirement) -> dict:
+    return {
+        "requirement_id": requirement.requirement_id,
+        "title": requirement.title,
+        "applies": requirement.applies,
+        "rationale": requirement.rationale,
+        "source_citation": requirement.source_citation,
+        "standards": [
+            {"standard_id": s.standard_id, "title": s.title, "note": s.note}
+            for s in requirement.standards
+        ],
+        "limitation_note": requirement.limitation_note,
+    }
+
+
+def _standards_mapping_to_dict(mapping: StandardsMappingResult) -> dict:
+    return {
+        "all_requirements": [_requirement_to_dict(r) for r in mapping.all_requirements],
+        "applicable_requirements": [_requirement_to_dict(r) for r in mapping.applicable_requirements],
+    }
+
+
+def _print_standards_report(mapping: StandardsMappingResult) -> None:
+    print("Standards mapping (all GSPR categories checked against the classified device):")
+    print(
+        "  NOTE: standards named below are commonly used to demonstrate conformity "
+        "with a requirement - not asserted to be the legally mandated choice or "
+        "currently EU-harmonised under Article 8. Always verify independently. See "
+        "standards_mapper/base.py."
+    )
+    print()
+    for req in mapping.all_requirements:
+        if req.applies:
+            print(f"  [X] {req.title} ({req.source_citation})")
+            print(f"      Why: {req.rationale}")
+            if req.standards:
+                for s in req.standards:
+                    note = f" - {s.note}" if s.note else ""
+                    print(f"      Standard: {s.standard_id} ({s.title}){note}")
+            else:
+                print("      Standard: (none named - see limitation note)")
+            if req.limitation_note:
+                print(f"      Limitation: {req.limitation_note}")
+        else:
+            print(f"  [ ] {req.title} ({req.source_citation}) - not applicable: {req.rationale}")
+    print()
+
+
 def _result_to_dict(
     device: DeviceAttributes,
     result: ClassificationResult,
     extraction: ExtractionResult | None = None,
+    standards: StandardsMappingResult | None = None,
 ) -> dict:
     def outcome_to_dict(o: RuleOutcome) -> dict:
         return {
@@ -121,6 +179,7 @@ def _result_to_dict(
         "explanation": result.explanation,
         "triggered_rules": [outcome_to_dict(o) for o in result.triggered_rules],
         "all_rule_outcomes": [outcome_to_dict(o) for o in result.all_rule_outcomes],
+        "standards_mapping": _standards_mapping_to_dict(standards) if standards is not None else None,
         "disclaimer": DISCLAIMER,
     }
 
@@ -129,6 +188,7 @@ def _print_report(
     device: DeviceAttributes,
     result: ClassificationResult,
     extraction: ExtractionResult | None = None,
+    standards: StandardsMappingResult | None = None,
 ) -> None:
     print(f"Device: {device.name or '(unnamed)'}")
     if device.description:
@@ -177,6 +237,10 @@ def _print_report(
         else:
             print(f"  {outcome.rule_id:<8} -> did not apply ({outcome.rationale})")
     print()
+
+    if standards is not None:
+        _print_standards_report(standards)
+
     print(DISCLAIMER)
 
 
@@ -229,10 +293,12 @@ def main(argv: list[str] | None = None) -> int:
     engine = EUMDRClassificationEngine()
     result = engine.classify(device)
 
+    standards = EUMDRStandardsMapper().map(device, result)
+
     if args.json:
-        print(json.dumps(_result_to_dict(device, result, extraction), indent=2))
+        print(json.dumps(_result_to_dict(device, result, extraction, standards), indent=2))
     else:
-        _print_report(device, result, extraction)
+        _print_report(device, result, extraction, standards)
 
     return 0
 

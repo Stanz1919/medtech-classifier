@@ -133,3 +133,39 @@ def test_cli_full_rule_breakdown_shown_for_structured_input():
     for i in range(1, 23):
         assert f"Rule {i}" in result.stdout
     assert "[DECISIVE]" in result.stdout
+
+
+# --- Phase 3: standards mapping ---
+
+
+def test_cli_standards_mapping_shown_by_default_human_readable():
+    """Standards mapping is always shown, no flag needed - same
+    full-transparency-by-default principle as the rule breakdown."""
+    result = _run_cli(str(EXAMPLES / "hip_implant.json"))
+    assert result.returncode == 0
+    assert "Standards mapping (all GSPR categories checked against the classified device):" in result.stdout
+    assert "ISO 14971" in result.stdout  # risk management, universal
+    assert "ISO 10993-1" in result.stdout  # biocompatibility, implant contacts tissue
+
+
+def test_cli_standards_mapping_included_in_json():
+    result = _run_cli(str(EXAMPLES / "hip_implant.json"), "--json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["standards_mapping"] is not None
+    assert len(payload["standards_mapping"]["all_requirements"]) == 14
+    applicable_ids = {r["requirement_id"] for r in payload["standards_mapping"]["applicable_requirements"]}
+    assert "risk_management" in applicable_ids
+    assert "biocompatibility" in applicable_ids
+
+
+def test_cli_standards_mapping_present_in_text_mode_too():
+    result = _run_cli(
+        "--text",
+        "A sterile, single-use hypodermic syringe used to inject medicinal products under the skin.",
+        "--json",
+    )
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    applicable_ids = {r["requirement_id"] for r in payload["standards_mapping"]["applicable_requirements"]}
+    assert "infection_and_sterility" in applicable_ids

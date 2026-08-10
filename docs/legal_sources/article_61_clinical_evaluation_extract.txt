@@ -1,0 +1,18 @@
+Source: Regulation (EU) 2017/745, Article 61(1) (Clinical evaluation) - opening paragraph only
+Retrieved from: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745 (via live browser session, see note in annex_i_general_safety_performance_requirements.txt)
+Retrieved on: 2026-08-10
+NOTE: Partial extract. This is the legal basis standards_mapper cites for flagging
+clinical evaluation as a universal requirement - it is Article 61, not an Annex I
+GSPR point, which is why it is kept in its own small file rather than folded into
+the Annex I extract.
+================================================================================
+
+Article 61
+
+Clinical evaluation
+
+1. Confirmation of conformity with relevant general safety and performance requirements set out in Annex I under the normal conditions of the intended use of the device, and the evaluation of the undesirable side-effects and of the acceptability of the benefit-risk-ratio referred to in Sections 1 and 8 of Annex I, shall be based on clinical data providing sufficient clinical evidence, including where applicable relevant data as referred to in Annex III.
+
+The manufacturer shall specify and justify the level of clinical evidence necessary to demonstrate conformity with the relevant general safety and performance requirements. That level of clinical evidence shall be appropriate in view of the characteristics of the device and its intended purpose.
+
+To that end, manufacturers shall plan, conduct and document a clinical evaluation in accordance with this Article and Part A of Annex XIV.

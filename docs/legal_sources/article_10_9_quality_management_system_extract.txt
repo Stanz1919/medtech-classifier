@@ -1,0 +1,18 @@
+Source: Regulation (EU) 2017/745, Article 10(9) (General obligations of manufacturers - quality management system) - opening paragraphs only
+Retrieved from: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745 (via live browser session, see note in annex_i_general_safety_performance_requirements.txt)
+Retrieved on: 2026-08-10
+NOTE: Partial extract. This is the legal basis standards_mapper cites for flagging a
+quality management system (ISO 13485) as a universal requirement - it is Article
+10(9), not an Annex I GSPR point, which is why it is kept in its own small file
+rather than folded into the Annex I extract.
+================================================================================
+
+Article 10
+
+General obligations of manufacturers
+
+9. Manufacturers shall ensure that procedures are in place to keep series production in conformity with the requirements of this Regulation. Changes in device design or characteristics and changes in the harmonised standards or CS by reference to which the conformity of a device is declared shall be adequately taken into account in a timely manner. Manufacturers of devices, other than investigational devices, shall establish, document, implement, maintain, keep up to date and continually improve a quality management system that shall ensure compliance with this Regulation in the most effective manner and in a manner that is proportionate to the risk class and the type of device.
+
+The quality management system shall cover all parts and elements of a manufacturer's organisation dealing with the quality of processes, procedures and devices. It shall govern the structure, responsibilities, procedures, processes and management resources required to implement the principles and actions necessary to achieve compliance with the provisions of this Regulation.
+
+The quality management system shall address at least the following aspects: [list of (a)-(m) omitted from this extract - see full regulation text for the complete list of required QMS elements]

@@ -92,9 +92,53 @@ judgement.
   absorbed" / "not systemically absorbed" matched their own positive
   signal because the negated phrase contains it as a substring.
 
-**Not yet built**: standards mapping (`standards_mapper/`) and the
-Streamlit UI (`ui/`). Their package directories exist as placeholders
-only.
+## Phase 3: standards mapping (done)
+
+- `standards_mapper/base.py` - the jurisdiction-agnostic `StandardsMapper`
+  / `GSPRRequirementCheck` interfaces and the `GSPRRequirement` /
+  `StandardApplicability` / `StandardsMappingResult` dataclasses,
+  mirroring `rules_engine.base`'s pattern.
+- `standards_mapper/eu_mdr/requirements.py` - 14 General Safety and
+  Performance Requirement (GSPR) categories (risk management, quality
+  management, clinical evaluation, labelling, biocompatibility,
+  sterility, biological-origin materials, incorporated medicinal
+  substances, software lifecycle, electrical/mechanical/EMC safety,
+  radiation protection, active implantable devices, measuring function,
+  energy/substance delivery), each its own class citing the exact Annex I
+  point (or Article, for the two universal obligations Annex I itself
+  doesn't create) it implements - grounded in the verbatim text fetched
+  for this phase, see Regulatory grounding below.
+- `standards_mapper/eu_mdr/mapper.py` - `EUMDRStandardsMapper`, which
+  evaluates all 14 categories against a classified device. No precedence
+  logic is needed here (unlike the classification engine) - GSPR
+  categories are independent, so a device can trigger several at once.
+- **Deliberately not a compliance checklist.** Article 8 of the
+  Regulation gives a presumption of conformity to a manufacturer who
+  follows a formally "harmonised standard" (a specific, dated,
+  Official-Journal-published list this project has no verified live copy
+  of) - but conformity can always be demonstrated by other means too. So
+  every standard this module names is described as "commonly used to
+  demonstrate conformity with" a GSPR, grounded in that standard's own
+  well-known scope - never asserted to be the legally mandated choice or
+  currently EU-harmonised. Standard designations are also given without
+  an edition year on purpose, since editions are periodically revised and
+  this module has no live link to check which is current. See
+  `standards_mapper/base.py`'s module docstring for the full reasoning.
+- **Full transparency by default**, same principle as Phase 1/2: every
+  report shows all 14 GSPR categories that were checked, including the
+  ones that don't apply and why - not just the applicable subset.
+- **Honest, documented gaps**: three GSPR categories are not evaluated at
+  all rather than guessed at, because `DeviceAttributes` has no field to
+  check them against - the Annex XVI "no medical purpose" products list,
+  CMR/endocrine-disruptor substance concentration limits, and devices
+  intended specifically for lay/home use. See the module docstring in
+  `standards_mapper/eu_mdr/requirements.py` for the full list and reasoning.
+- `cli.py` runs the standards mapper automatically after classification,
+  in both the human-readable report and `--json` output, for both input
+  modes (structured JSON and `--text`) - no extra flag needed.
+
+**Not yet built**: the Streamlit UI (`ui/`). Its package directory exists
+as a placeholder only.
 
 ## Regulatory grounding
 
@@ -113,6 +157,16 @@ reconstructed from memory:
 - `article_51_and_52_7_classification_and_subqualifiers.txt` - the legal
   basis for classification itself (Article 51) and the informal
   Is/Im/Ir sub-qualifiers (Article 52(7)).
+- `annex_i_general_safety_performance_requirements.txt` - the full text
+  of Annex I (all 23 numbered GSPR points, Chapters I-III), retrieved
+  2026-08-10 for Phase 3. EUR-Lex was blocking the automated fetcher that
+  day, so this one was retrieved via a live browser session against the
+  same EUR-Lex page instead - noted directly in the file.
+- `article_61_clinical_evaluation_extract.txt` and
+  `article_10_9_quality_management_system_extract.txt` - short extracts
+  of the two universal manufacturer obligations (clinical evaluation,
+  quality management system) that Phase 3's standards mapper cites but
+  that live in the Articles rather than Annex I, also retrieved 2026-08-10.
 
 **MDCG 2021-24 Rev.1** (official guidance interpreting the above,
 published by the Medical Device Coordination Group), retrieved
@@ -181,10 +235,10 @@ engine's strict literal reading of Annex VIII diverges from a commonly
 published industry classification figure, and explains why.
 
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
-cases, and both `rules_engine/eu_mdr/rules.py` and
-`extraction/keyword_extractor.py` sit at 100% statement coverage (256
-tests total) - see `docs/legal_sources/` for the retrieved source
-excerpts behind every citation in this codebase.
+cases, and `rules_engine/eu_mdr/rules.py`, `extraction/keyword_extractor.py`,
+and `standards_mapper/eu_mdr/` (requirements + mapper) all sit at 100%
+statement coverage (297 tests total) - see `docs/legal_sources/` for the
+retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
 
@@ -200,6 +254,10 @@ echo '{"invasiveness": "non_invasive"}' | python cli.py
 # Free text (Phase 2) - runs the default keyword extractor first
 python cli.py --text "A sterile, single-use hypodermic syringe used to inject medicinal products under the skin."
 python cli.py --text "A titanium hip replacement implant intended for permanent placement." --json
+
+# Both commands above also print a Phase 3 standards mapping section
+# automatically (which GSPR categories apply, and the standard(s)
+# commonly used to demonstrate conformity with each) - no extra flag.
 
 # Run the tests
 python -m pytest tests/ -v
@@ -223,10 +281,14 @@ rules_engine/
 extraction/
   base.py             Extractor interface, ExtractionResult
   keyword_extractor.py  KeywordExtractor - default free-text extractor
+standards_mapper/
+  base.py             StandardsMapper / GSPRRequirementCheck interfaces
+  eu_mdr/
+    requirements.py    14 GSPR requirement categories
+    mapper.py           EUMDRStandardsMapper
 cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  200 unit tests
+tests/                  297 unit tests
 docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
-standards_mapper/       Phase 3 placeholder (ISO 10993 / IEC 60601 / etc.)
 ui/                     Phase 4 placeholder (Streamlit)
 ```
