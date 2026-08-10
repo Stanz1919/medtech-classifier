@@ -484,11 +484,21 @@ _HEART_CIRC_SIGNALS = [
     _Signal(r"\bbifurcatio aortae\b|\baortic bifurcation\b", "aortic bifurcation (Annex VIII 2.6: bifurcatio aortae)"),
     _Signal(r"\baorta\b", "aorta (generic - Annex VIII 2.6 covers the aorta from aorta ascendens to the bifurcatio aortae)"),
     _Signal(r"\barteriae coronariae\b|\bcoronary arter(?:y|ies)\b|\bcoronary\b", "coronary artery/arteries (Annex VIII 2.6: arteriae coronariae)"),
-    _Signal(r"\barteria carotis communis\b|\bcommon carotid\b", "common carotid artery (Annex VIII 2.6: arteria carotis communis)"),
-    _Signal(r"\barteria carotis externa\b|\bexternal carotid\b", "external carotid artery (Annex VIII 2.6: arteria carotis externa)"),
-    _Signal(r"\barteria carotis interna\b|\binternal carotid\b", "internal carotid artery (Annex VIII 2.6: arteria carotis interna)"),
+    _Signal(r"\barteria carotis communis\b|\bcommon carotid\b|\bcca\b", "common carotid artery (Annex VIII 2.6: arteria carotis communis)"),
+    _Signal(r"\barteria carotis externa\b|\bexternal carotid\b|\beca\b", "external carotid artery (Annex VIII 2.6: arteria carotis externa)"),
+    _Signal(r"\barteria carotis interna\b|\binternal carotid\b|\bica\b", "internal carotid artery (Annex VIII 2.6: arteria carotis interna)"),
     _Signal(r"\bcarotid arter(?:y|ies)\b|\bcarotid\b", "carotid artery (generic - Annex VIII 2.6 covers the common/external/internal carotid arteries)"),
+    # "MCA" (middle cerebral artery) gets its own signal because it shares
+    # no substring with "cerebral artery" the way "anterior/posterior
+    # cerebral artery" do (those already match the line below). Deliberately
+    # NOT adding bare "ACA"/"PCA": the spelled-out forms are already covered
+    # via substring, and PCA specifically collides with "Patient-Controlled
+    # Analgesia" - a genuinely common phrase in infusion-pump device text,
+    # so a bare abbreviation there would be a real false-positive risk, not
+    # a hypothetical one.
+    _Signal(r"\bmca\b|\bmiddle cerebral artery\b", "middle cerebral artery / MCA (Annex VIII 2.6: arteriae cerebrales)"),
     _Signal(r"\barteriae cerebrales\b|\bcerebral arter(?:y|ies)\b", "cerebral artery/arteries (Annex VIII 2.6: arteriae cerebrales)"),
+    _Signal(r"\bcerebrovascular\b", "cerebrovascular (generic - implies a cerebral-artery/circulatory context per Annex VIII 2.6, not itself the defined term - verify it isn't describing brain tissue instead, see the CNS signals below)"),
     _Signal(r"\btruncus brachiocephalicus\b|\bbrachiocephalic trunk\b", "brachiocephalic trunk (Annex VIII 2.6: truncus brachiocephalicus)"),
     _Signal(r"\bvenae cordis\b|\bcardiac vein(?:s)?\b", "cardiac vein(s) (Annex VIII 2.6: venae cordis)"),
     _Signal(r"\bvenae pulmonales\b|\bpulmonary vein(?:s)?\b", "pulmonary vein(s) (Annex VIII 2.6: venae pulmonales)"),
@@ -502,7 +512,15 @@ _HEART_CIRC_SIGNALS = [
 # easy to miss if grounding from common sense rather than the definition
 # itself.
 _CNS_SIGNALS = [
-    _Signal(r"\bbrain\b|\bcerebral\b", "brain/cerebral (Annex VIII 2.7: 'the brain')"),
+    # Negative lookahead on "cerebral" excludes "cerebral artery/arteries/
+    # vascular/vein(s)" - those describe a blood vessel (central
+    # CIRCULATORY system, 2.6, see _HEART_CIRC_SIGNALS above), not brain
+    # TISSUE (central nervous system, 2.7). A stent sitting inside a
+    # cerebral artery contacts the vessel wall, not the brain itself -
+    # conflating the two would misreport which Rule 8 exception actually
+    # applies, even though both happen to escalate to the same Class III
+    # today. "cerebral cortex/hemisphere/edema" etc. still match correctly.
+    _Signal(r"\bbrain\b|\bcerebral\b(?!\s+(?:artery|arteries|vascular|vein|veins))", "brain/cerebral (Annex VIII 2.7: 'the brain')"),
     _Signal(r"\bmeninges\b|\bmeningeal\b", "meninges (Annex VIII 2.7 - easily missed vs. brain/spinal cord)"),
     _Signal(r"\bspinal cord\b", "spinal cord (Annex VIII 2.7: 'the...spinal cord')"),
     _Signal(r"\bcentral nervous system\b|\bcns\b", "explicitly 'central nervous system' / CNS"),

@@ -361,6 +361,50 @@ def test_central_nervous_system_meninges_not_missed():
     assert result.device.contacts_central_nervous_system is True
 
 
+def test_middle_cerebral_artery_abbreviation_reaches_central_circulatory_system():
+    """Regression test for a real user-reported case: a cerebrovascular
+    stent described as being implanted 'in the MCA region' returned Class
+    IIb instead of III, because the standard clinical abbreviation 'MCA'
+    (Middle Cerebral Artery) wasn't recognised - only the spelled-out
+    'cerebral artery' was. Annex VIII 2.6's vessel list includes 'arteriae
+    cerebrales' (cerebral arteries); MCA is one of them."""
+    result = _extract("A cerebrovascular stent to be implanted in the MCA region with a ferromagnetic coating.")
+    assert result.device.contacts_heart_or_central_circulatory_system is True
+    assert result.device.contacts_central_nervous_system is False
+
+
+def test_carotid_artery_abbreviations_ica_eca_cca():
+    for abbrev in ["ICA", "ECA", "CCA"]:
+        result = _extract(f"A device implanted in the {abbrev}.")
+        assert result.device.contacts_heart_or_central_circulatory_system is True, abbrev
+
+
+def test_cerebrovascular_alone_signals_circulatory_context():
+    result = _extract("A cerebrovascular intervention device.")
+    assert result.device.contacts_heart_or_central_circulatory_system is True
+
+
+def test_cerebral_artery_does_not_falsely_set_central_nervous_system():
+    """Regression test: a stent inside a cerebral ARTERY contacts the
+    vessel wall (central circulatory system, Annex VIII 2.6), not brain
+    TISSUE (central nervous system, 2.7) - conflating the two previously
+    happened because the bare word 'cerebral' matched the CNS signal even
+    when modifying 'artery'. Both exceptions escalate Rule 8 to the same
+    Class III today, but the rationale shown to the user should still
+    name the correct one."""
+    result = _extract("A stent implanted in the cerebral artery.")
+    assert result.device.contacts_heart_or_central_circulatory_system is True
+    assert result.device.contacts_central_nervous_system is False
+
+
+def test_cerebral_cortex_still_sets_central_nervous_system():
+    """The negative lookahead added for the case above must not overcorrect
+    - genuine brain-tissue phrases ('cerebral cortex/hemisphere/oedema'
+    etc., not followed by 'artery'/'vascular'/'vein') still match."""
+    result = _extract("A device in contact with the cerebral cortex.")
+    assert result.device.contacts_central_nervous_system is True
+
+
 # --- Rule 2 ---
 
 
