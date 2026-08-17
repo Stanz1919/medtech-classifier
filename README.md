@@ -223,13 +223,51 @@ classifier tool itself - not a single dashboard screen.
   driving the live app and inspecting the actual DOM surfaced it. Fixed
   by switching to `position="sidebar"`, Streamlit's original and far
   more battle-tested nav placement.
+- **Visual direction**: the project's own dark base restyled with IBM
+  Carbon's structural discipline rather than Carbon's actual light
+  canvas - one blue accent (`#4589FF`), square corners everywhere
+  (including the native primary button, via a verified
+  `[data-testid="stBaseButton-primary"]` override), hairline borders
+  instead of shadows. Chosen after building a real side-by-side
+  comparison artifact from IBM's actual published design tokens rather
+  than guessing at "looks IBM-ish."
+- **Scroll-reveal, a live progress bar, and count-up stats on the
+  homepage** - deliberately homepage-only; `ui/pages/classify.py` calls
+  the same helper only for the progress bar, never for reveal/count-up,
+  since gating a device's actual classification behind scroll position
+  would be bad UX for a tool, however nice it looks on marketing
+  content. Real `<script>` tags injected via `st.markdown` are silently
+  stripped by Streamlit (verified directly, not assumed) - the reliable
+  mechanism is `st.components.v1.html()`, which runs in an iframe
+  Streamlit serves same-origin, confirmed live that it can reach
+  `window.parent.document` and drive the real page.
+- **Two more real bugs found by driving the live app, not by trusting
+  that verified-correct CSS meant verified-correct behaviour**: the
+  progress bar read `window.scrollY`, but Streamlit doesn't scroll the
+  window - the actual scrollable element is `[data-testid="stMain"]`
+  (confirmed by watching `scrollY` stay 0 while the page visibly
+  scrolled). And the count-up animation depended entirely on
+  `requestAnimationFrame`, which - like `IntersectionObserver` - turns
+  out to be paint-tied: verified live, via `document.hidden`, a
+  browsing context that isn't actively compositing frames, that its
+  callback can simply never fire, which would have left every stat
+  frozen at 0 rather than just unanimated. Both effects now carry a
+  `setTimeout`-based fallback that reaches the correct end state
+  regardless of whether the animated version ever gets to run - a
+  missed animation is a trivial cosmetic loss, a permanently wrong
+  number or an invisible section is not. The reveal effect has a third,
+  fully CSS-only backstop (a delayed `@keyframes` fallback) for the case
+  where the injected script doesn't run at all.
 - Tested with Streamlit's own `streamlit.testing.v1.AppTest` harness
   (runs the real page script in a simulated session, no browser needed)
-  for logic and wiring, plus a live-browser pass (the two bugs above)
-  for what `AppTest` structurally can't see - 100% statement coverage
-  across `ui/app.py`, `ui/render.py`, `ui/examples.py`,
+  for logic, wiring, and exactly what markup got injected (AppTest can
+  confirm the right `data-count-to` values and section ids exist; it
+  can't render CSS transitions or fire real paint-dependent browser
+  APIs, which is precisely the class of bug the live-browser pass above
+  caught that it couldn't) - 100% statement coverage across
+  `ui/app.py`, `ui/render.py`, `ui/examples.py`, `ui/style.py`,
   `ui/file_extraction.py`, and `ui/pages/`, including real (not mocked)
-  OCR tests against Tesseract.
+  OCR tests against Tesseract. 352 tests total.
 
 **Run locally:**
 
@@ -348,7 +386,7 @@ published industry classification figure, and explains why.
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
 cases, and `rules_engine/eu_mdr/rules.py`, `extraction/keyword_extractor.py`,
 `standards_mapper/eu_mdr/` (requirements + mapper), and `ui/` all sit at
-100% statement coverage (349 tests total) - see `docs/legal_sources/` for
+100% statement coverage (352 tests total) - see `docs/legal_sources/` for
 the retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
@@ -411,7 +449,7 @@ ui/
   file_extraction.py   PDF/DOCX/TXT text extraction + image OCR (also no Streamlit import)
 cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  349 unit tests
+tests/                  352 unit tests
 docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
 requirements.txt        Python deps for Streamlit Community Cloud's zero-config deploy
 packages.txt            System (apt) deps for the same - just tesseract-ocr

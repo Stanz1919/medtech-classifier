@@ -1,6 +1,14 @@
 """Homepage: what this tool is, why it's built the way it is, and how to
 use it - before the visitor ever sees the classifier's input controls.
 Pure explainer content; no classification logic lives here at all.
+
+Scroll-driven polish (reveal-on-scroll, the top progress bar, the
+count-up stat strip) is deliberately scoped to this page only - see
+ui/style.py's module docstring for the mechanism, and
+ui/pages/classify.py's module docstring for why the results page
+intentionally does NOT use scroll-gated reveals: hiding a device's
+actual classification behind scroll position would be bad UX for a
+tool, even though it's a nice touch for marketing/explainer content.
 """
 
 from __future__ import annotations
@@ -8,7 +16,7 @@ from __future__ import annotations
 import streamlit as st
 
 from ui.render import DISCLAIMER, render_disclaimer
-from ui.style import inject_css
+from ui.style import inject_css, inject_scroll_effects
 
 inject_css()
 
@@ -24,6 +32,11 @@ st.markdown(
             exactly which one(s) triggered your result.
         </p>
     </div>
+    <nav class="mt-subnav">
+        <a href="#mt-why">Why this is different</a>
+        <a href="#mt-how">How it works</a>
+        <a href="#mt-ladder">The risk ladder</a>
+    </nav>
     """,
     unsafe_allow_html=True,
 )
@@ -36,7 +49,22 @@ with col2:
     st.link_button("View source on GitHub", "https://github.com/Stanz1919/medtech-classifier", width="stretch")
 
 st.write("")
-st.markdown('<div class="mt-section-title">Why this is different</div>', unsafe_allow_html=True)
+_STATS = [
+    (22, "", "Annex VIII rules"),
+    (14, "", "GSPR standards categories"),
+    (349, "", "automated tests"),
+    (100, "%", "statement coverage"),
+]
+stat_html = ['<div class="mt-stats mt-reveal">']
+for value, suffix, label in _STATS:
+    stat_html.append(
+        f'<div class="mt-stat"><div class="mt-stat-num" data-count-to="{value}" '
+        f'data-count-suffix="{suffix}">0{suffix}</div><div class="mt-stat-label">{label}</div></div>'
+    )
+stat_html.append("</div>")
+st.markdown("".join(stat_html), unsafe_allow_html=True)
+
+st.markdown('<div id="mt-why" class="mt-section-title">Why this is different</div>', unsafe_allow_html=True)
 
 _FEATURES = [
     (
@@ -65,10 +93,10 @@ _FEATURES = [
 cols = st.columns(4)
 for col, (title, body) in zip(cols, _FEATURES):
     with col:
-        st.markdown(f'<div class="mt-card"><h3>{title}</h3><p>{body}</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="mt-card mt-reveal"><h3>{title}</h3><p>{body}</p></div>', unsafe_allow_html=True)
 
 st.write("")
-st.markdown('<div class="mt-section-title">How it works</div>', unsafe_allow_html=True)
+st.markdown('<div id="mt-how" class="mt-section-title">How it works</div>', unsafe_allow_html=True)
 
 _STEPS = [
     (
@@ -92,12 +120,12 @@ cols = st.columns(3)
 for i, (col, (title, body)) in enumerate(zip(cols, _STEPS), start=1):
     with col:
         st.markdown(
-            f'<div class="mt-card"><div class="mt-step-num">{i}</div><h3>{title}</h3><p>{body}</p></div>',
+            f'<div class="mt-card mt-reveal"><div class="mt-step-num">{i}</div><h3>{title}</h3><p>{body}</p></div>',
             unsafe_allow_html=True,
         )
 
 st.write("")
-st.markdown('<div class="mt-section-title">The risk ladder</div>', unsafe_allow_html=True)
+st.markdown('<div id="mt-ladder" class="mt-section-title">The risk ladder</div>', unsafe_allow_html=True)
 st.caption("Annex VIII classifies every device into one of four classes, lowest to highest risk.")
 
 ladder_cols = st.columns(4)
@@ -114,3 +142,5 @@ for col, (cls, color, label, example) in zip(ladder_cols, _LADDER):
 
 st.write("")
 render_disclaimer()
+
+inject_scroll_effects()

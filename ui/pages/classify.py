@@ -10,6 +10,13 @@ full-transparency principle. Nothing on this page adds to that logic; it
 only presents it, and gives free text more ways to arrive (typed,
 pasted, extracted from an uploaded document, or OCR'd from an uploaded
 image) before it reaches the exact same KeywordExtractor.
+
+This page calls ``inject_scroll_effects()`` too, but only for the top
+progress bar (a pure indicator, gates nothing) - deliberately does not
+use ``mt-reveal``/``data-count-to`` markup the way ui/pages/home.py
+does. Hiding a device's actual classification behind scroll position
+would be bad UX for a tool: results should appear complete immediately,
+not be gated behind scrolling into view.
 """
 
 from __future__ import annotations
@@ -39,9 +46,10 @@ from ui.render import (
     render_rule_breakdown,
     render_standards_mapping,
 )
-from ui.style import inject_css
+from ui.style import inject_css, inject_scroll_effects
 
 inject_css()
+inject_scroll_effects()
 
 
 def _apply_text_example() -> None:

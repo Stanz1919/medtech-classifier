@@ -259,6 +259,34 @@ def test_home_page_shows_disclaimer():
     assert any("not real regulatory or legal advice" in c.value for c in at.caption)
 
 
+def test_home_page_stat_strip_has_correct_real_numbers():
+    """AppTest can't verify the count-up animation (that needs a real,
+    compositing browser - see ui/style.py's module docstring for why),
+    but it can verify the right numbers actually got injected, which is
+    what the animation would be counting up to."""
+    at = _fresh_home()
+    full_markup = " ".join(m.value for m in at.markdown)
+    assert 'data-count-to="22"' in full_markup
+    assert 'data-count-to="14"' in full_markup
+    assert 'data-count-to="349"' in full_markup
+    assert 'data-count-to="100" data-count-suffix="%"' in full_markup
+
+
+def test_home_page_subnav_links_match_real_section_ids():
+    at = _fresh_home()
+    full_markup = " ".join(m.value for m in at.markdown)
+    for anchor_id, link_target in [("mt-why", "#mt-why"), ("mt-how", "#mt-how"), ("mt-ladder", "#mt-ladder")]:
+        assert f'id="{anchor_id}"' in full_markup, f"missing section id={anchor_id!r}"
+        assert f'href="{link_target}"' in full_markup, f"subnav missing link to {link_target!r}"
+
+
+def test_home_page_hero_and_cards_are_wired_for_scroll_reveal():
+    at = _fresh_home()
+    full_markup = " ".join(m.value for m in at.markdown)
+    assert 'class="mt-stats mt-reveal"' in full_markup
+    assert full_markup.count('mt-card mt-reveal') == 7  # 4 feature cards + 3 how-it-works steps
+
+
 # --- Document / image upload wiring (ui/pages/classify.py) ---
 
 
