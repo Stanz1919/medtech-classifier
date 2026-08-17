@@ -153,13 +153,18 @@ classifier tool itself - not a single dashboard screen.
   four points as "Why this is different" below, as cards), how it works,
   and a risk-ladder preview - explainer content only, no classification
   logic.
-- `ui/pages/classify.py` - the tool itself: input in the sidebar, full
-  audit-trail output in the main area. Same two input modes as the CLI
-  (free text, which runs the keyword extractor first, or structured JSON,
-  which bypasses extraction), each with a "try an example" dropdown - the
-  free-text set doubles as a demo of the extractor's most distinctive
-  documented behaviour (the Rule 6/8 routing fixes from Phase 2, and the
-  clarifying-questions design for software severity).
+- `ui/pages/classify.py` - the tool itself: input in a bordered
+  container in the main content area, audit-trail output below it -
+  input originally lived in the sidebar, but a multi-line description,
+  a file uploader, and a JSON blob all genuinely need more than the
+  ~300px a sidebar column gives them. The sidebar is left for
+  navigation and the secondary "About this tool" note. Same two input
+  modes as the CLI (free text, which runs the keyword extractor first,
+  or structured JSON, which bypasses extraction), each with a "try an
+  example" dropdown - the free-text set doubles as a demo of the
+  extractor's most distinctive documented behaviour (the Rule 6/8
+  routing fixes from Phase 2, and the clarifying-questions design for
+  software severity).
 - `ui/render.py` - the display helpers `classify.py` calls, each a pure
   function of one core dataclass (`ClassificationResult` /
   `ExtractionResult` / `StandardsMappingResult`).
@@ -267,7 +272,7 @@ classifier tool itself - not a single dashboard screen.
   caught that it couldn't) - 100% statement coverage across
   `ui/app.py`, `ui/render.py`, `ui/examples.py`, `ui/style.py`,
   `ui/file_extraction.py`, and `ui/pages/`, including real (not mocked)
-  OCR tests against Tesseract. 352 tests total.
+  OCR tests against Tesseract. 353 tests total.
 
 **Run locally:**
 
@@ -386,7 +391,7 @@ published industry classification figure, and explains why.
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
 cases, and `rules_engine/eu_mdr/rules.py`, `extraction/keyword_extractor.py`,
 `standards_mapper/eu_mdr/` (requirements + mapper), and `ui/` all sit at
-100% statement coverage (352 tests total) - see `docs/legal_sources/` for
+100% statement coverage (353 tests total) - see `docs/legal_sources/` for
 the retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
@@ -449,7 +454,7 @@ ui/
   file_extraction.py   PDF/DOCX/TXT text extraction + image OCR (also no Streamlit import)
 cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  352 unit tests
+tests/                  353 unit tests
 docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
 requirements.txt        Python deps for Streamlit Community Cloud's zero-config deploy
 packages.txt            System (apt) deps for the same - just tesseract-ocr

@@ -4,6 +4,13 @@ sitting on top of the same three core packages (``rules_engine``,
 other. This file owns layout and input handling only; all display logic
 lives in ``ui/render.py``.
 
+Input lives in the main content area, inside a bordered ``st.container``,
+not the sidebar - it did originally, but a multi-line description, a
+file uploader, and a JSON blob all genuinely need more than a ~300px
+sidebar column gives them. The sidebar is left for navigation (which
+``st.navigation(position="sidebar")`` populates on its own - see
+``ui/app.py``) and the secondary "About this tool" note.
+
 The classification and standards-mapping logic is byte-for-byte
 identical to the CLI's - same deterministic engine, same extractor, same
 full-transparency principle. Nothing on this page adds to that logic; it
@@ -92,95 +99,8 @@ def _extract_uploaded_files(files: list) -> tuple[dict[str, str], dict[str, str]
     return extracted, errors
 
 
-# --- Sidebar: input ---
+# --- Sidebar: navigation only + secondary info ---
 
-st.sidebar.title("⚕️ Classify a device")
-mode = st.sidebar.radio(
-    "Input mode",
-    ["Free text (recommended)", "Structured JSON (advanced)"],
-    help=(
-        "Free text runs the default keyword extractor first (extraction.KeywordExtractor), "
-        "same as the CLI's --text mode. Structured JSON bypasses extraction entirely and feeds "
-        "DeviceAttributes straight to the deterministic engine, same as the CLI's default mode."
-    ),
-)
-
-if mode.startswith("Free text"):
-    st.sidebar.selectbox(
-        "Try an example",
-        ["— choose —"] + list(TEXT_EXAMPLES.keys()),
-        key="text_example_choice",
-        on_change=_apply_text_example,
-    )
-
-    uploaded_files = st.sidebar.file_uploader(
-        "Or upload a document / image",
-        type=SUPPORTED_DOCUMENT_EXTENSIONS + SUPPORTED_IMAGE_EXTENSIONS,
-        accept_multiple_files=True,
-        help=(
-            "PDF/DOCX/TXT: text is extracted directly. PNG/JPEG: text visible in the image "
-            "(e.g. labels or callouts on a technical drawing) is read via OCR - it cannot "
-            "interpret a device's shape or appearance, only text actually printed in the image."
-        ),
-    )
-    if uploaded_files:
-        extracted, errors = _extract_uploaded_files(uploaded_files)
-        for name, text in extracted.items():
-            with st.sidebar.expander(f"📄 {name}"):
-                st.text(text[:500] + ("…" if len(text) > 500 else ""))
-        for name, msg in errors.items():
-            st.sidebar.warning(f"{name}: {msg}")
-        if extracted and st.sidebar.button("Add extracted text to description", width="stretch"):
-            existing = st.session_state.get("device_text", "").strip()
-            combined = "\n\n".join(([existing] if existing else []) + list(extracted.values()))
-            st.session_state.device_text = combined[:2000]
-
-    st.sidebar.text_area(
-        "Device description",
-        key="device_text",
-        height=160,
-        max_chars=2000,
-        placeholder=(
-            "Describe the device: what it is, what it's made of, where and how it "
-            "contacts the body, and whether it's active, software, sterile, or implantable."
-        ),
-    )
-else:
-    st.sidebar.selectbox(
-        "Try an example",
-        ["— choose —"] + list(JSON_EXAMPLES.keys()),
-        key="json_example_choice",
-        on_change=_apply_json_example,
-    )
-    st.sidebar.text_area(
-        "DeviceAttributes JSON",
-        key="device_json",
-        height=240,
-        placeholder='{\n  "invasiveness": "surgically_invasive",\n  "is_implantable": true\n}',
-    )
-    st.sidebar.caption("See rules_engine/models.py for the full DeviceAttributes field reference.")
-
-run = st.sidebar.button("Classify", type="primary", width="stretch")
-
-if run:
-    if mode.startswith("Free text"):
-        text = st.session_state.get("device_text", "").strip()
-        if not text:
-            st.sidebar.error("Enter a device description first.")
-        else:
-            st.session_state.pipeline_mode = "text"
-            st.session_state.pipeline_input = text
-            st.session_state.has_result = True
-    else:
-        raw = st.session_state.get("device_json", "").strip()
-        if not raw:
-            st.sidebar.error("Enter DeviceAttributes JSON first.")
-        else:
-            st.session_state.pipeline_mode = "json"
-            st.session_state.pipeline_input = raw
-            st.session_state.has_result = True
-
-st.sidebar.divider()
 with st.sidebar.expander("About this tool"):
     st.caption(DISCLAIMER)
     st.caption(
@@ -190,7 +110,7 @@ with st.sidebar.expander("About this tool"):
         "grounding methodology and source citations."
     )
 
-# --- Main area: output ---
+# --- Main area: input ---
 
 st.title("⚕️ Classify a device")
 st.caption(
@@ -198,9 +118,102 @@ st.caption(
     "not an LLM guessing an answer."
 )
 
+mode = st.radio(
+    "Input mode",
+    ["Free text (recommended)", "Structured JSON (advanced)"],
+    horizontal=True,
+    help=(
+        "Free text runs the default keyword extractor first (extraction.KeywordExtractor), "
+        "same as the CLI's --text mode. Structured JSON bypasses extraction entirely and feeds "
+        "DeviceAttributes straight to the deterministic engine, same as the CLI's default mode."
+    ),
+)
+
+with st.container(border=True):
+    if mode.startswith("Free text"):
+        st.selectbox(
+            "Try an example",
+            ["— choose —"] + list(TEXT_EXAMPLES.keys()),
+            key="text_example_choice",
+            on_change=_apply_text_example,
+        )
+
+        uploaded_files = st.file_uploader(
+            "Or upload a document / image",
+            type=SUPPORTED_DOCUMENT_EXTENSIONS + SUPPORTED_IMAGE_EXTENSIONS,
+            accept_multiple_files=True,
+            help=(
+                "PDF/DOCX/TXT: text is extracted directly. PNG/JPEG: text visible in the image "
+                "(e.g. labels or callouts on a technical drawing) is read via OCR - it cannot "
+                "interpret a device's shape or appearance, only text actually printed in the image."
+            ),
+        )
+        if uploaded_files:
+            extracted, errors = _extract_uploaded_files(uploaded_files)
+            for name, text in extracted.items():
+                with st.expander(f"📄 {name}"):
+                    st.text(text[:500] + ("…" if len(text) > 500 else ""))
+            for name, msg in errors.items():
+                st.warning(f"{name}: {msg}")
+            if extracted and st.button("Add extracted text to description", width="stretch"):
+                existing = st.session_state.get("device_text", "").strip()
+                combined = "\n\n".join(([existing] if existing else []) + list(extracted.values()))
+                st.session_state.device_text = combined[:2000]
+
+        st.text_area(
+            "Device description",
+            key="device_text",
+            height=220,
+            max_chars=2000,
+            placeholder=(
+                "Describe the device: what it is, what it's made of, where and how it "
+                "contacts the body, and whether it's active, software, sterile, or implantable."
+            ),
+        )
+    else:
+        st.selectbox(
+            "Try an example",
+            ["— choose —"] + list(JSON_EXAMPLES.keys()),
+            key="json_example_choice",
+            on_change=_apply_json_example,
+        )
+        st.text_area(
+            "DeviceAttributes JSON",
+            key="device_json",
+            height=280,
+            placeholder='{\n  "invasiveness": "surgically_invasive",\n  "is_implantable": true\n}',
+        )
+        st.caption("See rules_engine/models.py for the full DeviceAttributes field reference.")
+
+    col_btn, _ = st.columns([1, 3])
+    with col_btn:
+        run = st.button("Classify", type="primary", width="stretch")
+
+    if run:
+        if mode.startswith("Free text"):
+            text = st.session_state.get("device_text", "").strip()
+            if not text:
+                st.error("Enter a device description first.")
+            else:
+                st.session_state.pipeline_mode = "text"
+                st.session_state.pipeline_input = text
+                st.session_state.has_result = True
+        else:
+            raw = st.session_state.get("device_json", "").strip()
+            if not raw:
+                st.error("Enter DeviceAttributes JSON first.")
+            else:
+                st.session_state.pipeline_mode = "json"
+                st.session_state.pipeline_input = raw
+                st.session_state.has_result = True
+
+st.write("")
+
+# --- Main area: output ---
+
 if not st.session_state.get("has_result"):
     st.info(
-        "👈 Describe a device in the sidebar (or pick an example, or upload a document/image) "
+        "👆 Describe a device above (or pick an example, or upload a document/image) "
         "and click **Classify** to see a full, auditable EU MDR 2017/745 classification - every "
         "rule and every standards-mapping category checked, not just the ones that applied."
     )

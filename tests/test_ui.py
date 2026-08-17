@@ -10,6 +10,13 @@ identically whether it was reached via st.navigation or run standalone
 (neither page calls st.set_page_config, which lives solely in the
 router - see ui/app.py's module docstring).
 
+ui/pages/classify.py's input widgets (mode radio, examples, upload,
+text areas, the Classify button) live in the main content area, not the
+sidebar - see that module's docstring for why. Only "About this tool"
+is still genuinely in the sidebar, so most widget lookups below use the
+plain (unscoped) accessor now; `.sidebar.*` only appears where a test
+is specifically checking that expander.
+
 These are deliberately smoke-level, not a re-test of the extractor or
 rules engine (those already have their own exhaustive suites) - the
 point here is confirming the UI wiring itself doesn't crash and shows
@@ -40,15 +47,15 @@ def _fresh_app() -> AppTest:
 
 
 def _classify_via_text_example(at: AppTest, example_key: str) -> AppTest:
-    at.sidebar.selectbox[0].select(example_key).run()
-    at.sidebar.button[0].click().run()
+    at.selectbox[0].select(example_key).run()
+    at.button[0].click().run()
     return at
 
 
 def _classify_via_json_example(at: AppTest, example_key: str) -> AppTest:
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.selectbox[0].select(example_key).run()
-    at.sidebar.button[0].click().run()
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.selectbox[0].select(example_key).run()
+    at.button[0].click().run()
     return at
 
 
@@ -114,9 +121,9 @@ def test_all_json_examples_run_without_exception():
 
 def test_invalid_json_shows_friendly_error_not_a_crash():
     at = _fresh_app()
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.text_area[0].set_value("{not valid json").run()
-    at.sidebar.button[0].click().run()
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.text_area[0].set_value("{not valid json").run()
+    at.button[0].click().run()
     assert not at.exception
     assert any("Invalid JSON" in e.value for e in at.error)
     assert len(at.metric) == 0
@@ -124,18 +131,18 @@ def test_invalid_json_shows_friendly_error_not_a_crash():
 
 def test_unknown_field_json_shows_friendly_error_not_a_crash():
     at = _fresh_app()
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.text_area[0].set_value('{"not_a_real_field": true}').run()
-    at.sidebar.button[0].click().run()
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.text_area[0].set_value('{"not_a_real_field": true}').run()
+    at.button[0].click().run()
     assert not at.exception
     assert any("Invalid device attributes" in e.value for e in at.error)
 
 
-def test_empty_text_input_shows_sidebar_error_not_a_crash():
+def test_empty_text_input_shows_error_not_a_crash():
     at = _fresh_app()
-    at.sidebar.button[0].click().run()
+    at.button[0].click().run()
     assert not at.exception
-    assert any("Enter a device description" in e.value for e in at.sidebar.error)
+    assert any("Enter a device description" in e.value for e in at.error)
     assert len(at.metric) == 0
 
 
@@ -146,12 +153,12 @@ def test_successful_classification_renders_rule_breakdown_and_standards_tables()
     assert len(at.dataframe) == 2
 
 
-def test_empty_json_input_shows_sidebar_error_not_a_crash():
+def test_empty_json_input_shows_error_not_a_crash():
     at = _fresh_app()
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.button[0].click().run()
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.button[0].click().run()
     assert not at.exception
-    assert any("Enter DeviceAttributes JSON" in e.value for e in at.sidebar.error)
+    assert any("Enter DeviceAttributes JSON" in e.value for e in at.error)
     assert len(at.metric) == 0
 
 
@@ -160,13 +167,13 @@ def test_unexpected_extraction_error_shows_friendly_message_not_a_crash():
     extraction blew up unexpectedly, the app must show a message, not a
     raw traceback, for a public-facing demo."""
     at = _fresh_app()
-    at.sidebar.selectbox[0].select("Hip replacement implant (Class III)").run()
+    at.selectbox[0].select("Hip replacement implant (Class III)").run()
     # Patched at its defining module, not "ui.app" - patch()'s string form
     # would import "ui.app" directly to resolve the target, which (like any
     # plain import of a Streamlit script) crashes outside a real session.
     # ui.app.KeywordExtractor is the same class object either way.
     with patch("extraction.keyword_extractor.KeywordExtractor.extract", side_effect=RuntimeError("boom")):
-        at.sidebar.button[0].click().run()
+        at.button[0].click().run()
     assert not at.exception
     assert any("Could not process this input" in e.value for e in at.error)
 
@@ -176,9 +183,9 @@ def test_undetermined_classification_shows_error_not_a_crash():
     Annex VIII rule inapplicable - confirms the UI's UNDETERMINED path,
     not just the classification engine's own None case."""
     at = _fresh_app()
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.text_area[0].set_value('{"invasiveness": "invasive_body_orifice"}').run()
-    at.sidebar.button[0].click().run()
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.text_area[0].set_value('{"invasiveness": "invasive_body_orifice"}').run()
+    at.button[0].click().run()
     assert not at.exception
     assert len(at.metric) == 0
     assert any("UNDETERMINED" in e.value for e in at.error)
@@ -186,8 +193,8 @@ def test_undetermined_classification_shows_error_not_a_crash():
 
 def test_free_text_with_no_keyword_matches_shows_caption_not_a_crash():
     at = _fresh_app()
-    at.sidebar.text_area[0].set_value("asdf jkl qwerty banana").run()
-    at.sidebar.button[0].click().run()
+    at.text_area[0].set_value("asdf jkl qwerty banana").run()
+    at.button[0].click().run()
     assert not at.exception
     assert any("No keyword matches found" in c.value for c in at.caption)
 
@@ -197,14 +204,22 @@ def test_ambiguous_rule_flag_shown_for_ancillary_joint_component():
     (pedicle screws etc. - see docs/CLARIFICATIONS_RULE_8.md) must
     surface its warning in the rule-breakdown expander."""
     at = _fresh_app()
-    at.sidebar.radio[0].set_value("Structured JSON (advanced)").run()
-    at.sidebar.text_area[0].set_value(
+    at.radio[0].set_value("Structured JSON (advanced)").run()
+    at.text_area[0].set_value(
         '{"is_implantable": true, "is_joint_replacement": true, "is_ancillary_component": true}'
     ).run()
-    at.sidebar.button[0].click().run()
+    at.button[0].click().run()
     assert not at.exception
     assert at.metric[0].value == "Class IIb"
     assert any("JUDGEMENT CALL FLAGGED" in w.value for w in at.warning)
+
+
+def test_about_expander_still_lives_in_the_sidebar():
+    """The one thing that's genuinely still in the sidebar - see
+    ui/pages/classify.py's module docstring for why everything else
+    moved to the main content area."""
+    at = _fresh_app()
+    assert any("About this tool" in e.label for e in at.sidebar.expander)
 
 
 # --- Router / navigation (ui/app.py) ---
@@ -316,30 +331,30 @@ def _make_ocr_image_bytes(text: str) -> bytes:
 
 def test_uploaded_txt_document_previews_and_populates_description():
     at = _fresh_app()
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload("spec.txt", b"A titanium hip replacement implant intended for permanent placement.").run()
     assert not at.exception
     # Preview shown before the user opts to add it to the description.
-    assert any("spec.txt" in e.label for e in at.sidebar.expander)
-    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    assert any("spec.txt" in e.label for e in at.expander)
+    add_button = next(b for b in at.button if "Add extracted text" in b.label)
     add_button.click().run()
-    assert "hip replacement implant" in at.sidebar.text_area[0].value.lower()
-    at.sidebar.button[-1].click().run()  # Classify
+    assert "hip replacement implant" in at.text_area[0].value.lower()
+    at.button[-1].click().run()  # Classify
     assert not at.exception
     assert at.metric[0].value == "Class III"
 
 
 def test_uploaded_docx_document_reaches_expected_class():
     at = _fresh_app()
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload(
         "spec.docx",
         _make_docx_bytes("A cardiac pacemaker implanted permanently to regulate heart rhythm."),
         mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ).run()
-    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    add_button = next(b for b in at.button if "Add extracted text" in b.label)
     add_button.click().run()
-    at.sidebar.button[-1].click().run()
+    at.button[-1].click().run()
     assert not at.exception
     assert at.metric[0].value == "Class III"
 
@@ -348,13 +363,13 @@ def test_uploaded_image_is_ocrd_and_reaches_expected_class():
     """Real Tesseract OCR through the full UI wiring, not mocked - see
     tests/test_file_extraction.py for the module-level OCR tests."""
     at = _fresh_app()
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload("drawing.png", _make_ocr_image_bytes("Implantable cardiac pacemaker"), mime_type="image/png").run()
     assert not at.exception
-    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    add_button = next(b for b in at.button if "Add extracted text" in b.label)
     add_button.click().run()
-    assert "pacemaker" in at.sidebar.text_area[0].value.lower()
-    at.sidebar.button[-1].click().run()
+    assert "pacemaker" in at.text_area[0].value.lower()
+    at.button[-1].click().run()
     assert not at.exception
     assert at.metric[0].value == "Class III"
 
@@ -372,11 +387,11 @@ def test_uploaded_image_with_no_visible_text_shows_no_text_found_warning():
     blank = Image.new("RGB", (200, 200), color="white")
     buf = io.BytesIO()
     blank.save(buf, format="PNG")
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload("device_photo.png", buf.getvalue(), mime_type="image/png").run()
     assert not at.exception
-    assert any("No text found" in w.value for w in at.sidebar.warning)
-    assert not any("Add extracted text" in b.label for b in at.sidebar.button)
+    assert any("No text found" in w.value for w in at.warning)
+    assert not any("Add extracted text" in b.label for b in at.button)
 
 
 def test_uploaded_image_when_tesseract_unavailable_shows_friendly_warning():
@@ -388,13 +403,13 @@ def test_uploaded_image_when_tesseract_unavailable_shows_friendly_warning():
     import pytesseract
 
     at = _fresh_app()
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload("drawing.png", _make_ocr_image_bytes("Implantable cardiac pacemaker"), mime_type="image/png").run()
     with patch.object(pytesseract, "image_to_string", side_effect=pytesseract.TesseractNotFoundError()):
         at.run()
     assert not at.exception
-    assert any("OCR isn't available" in w.value for w in at.sidebar.warning)
-    assert not any("Add extracted text" in b.label for b in at.sidebar.button)
+    assert any("OCR isn't available" in w.value for w in at.warning)
+    assert not any("Add extracted text" in b.label for b in at.button)
 
 
 def test_uploaded_corrupt_image_shows_warning_not_a_crash():
@@ -405,8 +420,8 @@ def test_uploaded_corrupt_image_shows_warning_not_a_crash():
     tests/test_file_extraction.py::test_extract_text_from_upload_rejects_unsupported_extension
     for that defensive path instead)."""
     at = _fresh_app()
-    uploader = at.sidebar.get("file_uploader")[0]
+    uploader = at.get("file_uploader")[0]
     uploader.upload("drawing.png", b"not actually a png file", mime_type="image/png").run()
     assert not at.exception
-    assert any("drawing.png" in w.value for w in at.sidebar.warning)
-    assert not any("Add extracted text" in b.label for b in at.sidebar.button)
+    assert any("drawing.png" in w.value for w in at.warning)
+    assert not any("Add extracted text" in b.label for b in at.button)
