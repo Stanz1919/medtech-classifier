@@ -12,6 +12,23 @@ docstring for that boundary.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# Every absolute import in this project (ui.render, ui.examples, cli,
+# rules_engine.*, extraction.*, standards_mapper.*) assumes the repo
+# root is on sys.path. Locally that happens for free - `python -m
+# streamlit run ui/app.py` and `python -m pytest` both put the launch
+# directory (the repo root) on sys.path[0] automatically, which is why
+# this worked in every environment actually tested before deploying.
+# Streamlit Community Cloud invokes the app differently and doesn't, so
+# `from ui.render import ...` inside ui/pages/home.py failed with
+# ModuleNotFoundError there specifically - fixed at the source (make the
+# assumption true) rather than worked around per-import.
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 import streamlit as st
 
 st.set_page_config(
