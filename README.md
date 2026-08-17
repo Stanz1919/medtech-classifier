@@ -139,49 +139,97 @@ judgement.
 
 ## Phase 4: Streamlit UI (done)
 
-- `ui/app.py` - the entry point (`streamlit run ui/app.py`). Owns layout
-  and input handling only; a **sibling front-end to `cli.py`**, not
-  dependent on it - both sit on top of the same three core packages
-  (`rules_engine`, `extraction`, `standards_mapper`) and know nothing
-  about each other. The classification and standards-mapping logic is
-  byte-for-byte identical to the CLI's; this file only presents it.
-- `ui/render.py` - the display helpers `app.py` calls, each a pure
+A two-page site - a homepage explaining what this is and why, then the
+classifier tool itself - not a single dashboard screen.
+
+- `ui/app.py` - the router (`streamlit run ui/app.py`): wires
+  `st.navigation`/`st.Page` between the two pages and does nothing else.
+  A **sibling front-end to `cli.py`**, not dependent on it - both sit on
+  top of the same three core packages (`rules_engine`, `extraction`,
+  `standards_mapper`) and know nothing about each other. The
+  classification and standards-mapping logic is byte-for-byte identical
+  to the CLI's.
+- `ui/pages/home.py` - what this is, why it's built this way (the same
+  four points as "Why this is different" below, as cards), how it works,
+  and a risk-ladder preview - explainer content only, no classification
+  logic.
+- `ui/pages/classify.py` - the tool itself: input in the sidebar, full
+  audit-trail output in the main area. Same two input modes as the CLI
+  (free text, which runs the keyword extractor first, or structured JSON,
+  which bypasses extraction), each with a "try an example" dropdown - the
+  free-text set doubles as a demo of the extractor's most distinctive
+  documented behaviour (the Rule 6/8 routing fixes from Phase 2, and the
+  clarifying-questions design for software severity).
+- `ui/render.py` - the display helpers `classify.py` calls, each a pure
   function of one core dataclass (`ClassificationResult` /
-  `ExtractionResult` / `StandardsMappingResult`) - kept separate from
-  `app.py` so layout/input concerns don't tangle with display concerns.
-- `ui/examples.py` - the curated demo data (8 free-text examples spanning
-  the full risk ladder, plus every JSON file in `examples/`), kept in its
-  own side-effect-free module on purpose: `ui/app.py` is a real Streamlit
-  script, and importing it directly (rather than running it via
+  `ExtractionResult` / `StandardsMappingResult`).
+- `ui/style.py` - the dark, clinical theme's custom CSS (hero banner,
+  feature cards, step markers) layered on top of `.streamlit/config.toml`'s
+  `base="dark"` default. Deliberately does **not** branch on a
+  `prefers-color-scheme` media query - that reflects the OS/browser's
+  preference, not Streamlit's own active theme, and verifying this UI
+  live caught the two disagreeing in practice (a browser reporting no
+  dark preference still correctly renders Streamlit's own dark chrome,
+  which made an earlier light-mode CSS fallback here render wrong by
+  default, not just in some rare edge case). See the module docstring for
+  the full reasoning; native components (`st.badge`, `st.metric`,
+  `st.dataframe`) re-theme correctly regardless.
+- `ui/examples.py` and `ui/file_extraction.py` are both kept free of any
+  Streamlit import on purpose: `ui/pages/*.py` are real Streamlit
+  scripts, and importing one directly (rather than running it via
   `streamlit run` or `AppTest`) executes its interactive flow outside a
   real session and crashes - a real bug this project's own test suite
-  caught (see `tests/test_ui.py`'s module docstring).
-- **Same two input modes as the CLI**: free text (recommended, runs the
-  keyword extractor first) or structured JSON (advanced, bypasses
-  extraction). A "try an example" dropdown in each mode - the free-text
-  set is chosen to also demonstrate the extractor's most distinctive
-  documented behaviour: the Rule 6/Rule 8 routing fixes from Phase 2, and
-  the clarifying-questions design for software severity (the heartbeat
-  app example that motivated it in the first place).
+  caught early (see `tests/test_ui.py`'s module docstring).
+- **Document and image upload, alongside typing**: `ui/file_extraction.py`
+  pulls text out of an uploaded PDF (`pypdf`), DOCX (`python-docx`, including
+  table cells), or plain text file, or **OCRs an image** (`pytesseract`/
+  Tesseract) - a technical drawing's dimension callouts, material labels,
+  or part numbers. Extracted text is shown for review before the user
+  opts to add it to the same description box typing uses; the
+  classification pipeline never knows or cares which source the text
+  came from.
+- **OCR only for images, deliberately - not a vision model.** Asked
+  directly rather than assumed: reading a bare photo's shape or
+  appearance would mean routing it through a vision model's own
+  judgement, which conflicts with this project's whole premise ("not an
+  LLM guessing tool") and would need an API key and a per-use cost this
+  project doesn't otherwise have anywhere. OCR only reads text actually
+  printed in the image - honestly, a photo with no visible text yields
+  nothing, rather than a hallucinated guess. See
+  `ui/file_extraction.py`'s module docstring.
 - **Same full-transparency principle**, adapted to a browser instead of
   a scrolling terminal: a compact table of all 22 rules / all 14 GSPR
   categories by default, full rationale and citations one click away in
   an expander rather than one long unbroken dump of text.
 - **Risk-ladder color coding** via Streamlit's native `st.badge`
   (green -> yellow -> orange -> red for Class I -> IIa -> IIb -> III) -
-  deliberately built on native, theme-aware components rather than
-  custom CSS, so it re-themes correctly if a viewer switches to dark
-  mode without this project having to hand-roll that.
+  built on native, theme-aware components rather than custom CSS for
+  this specific piece, so it re-themes correctly regardless of the point
+  above.
 - **Defensive by design for a public-facing demo**: invalid JSON,
-  unknown `DeviceAttributes` fields, and genuinely undetermined
-  classifications (no Annex VIII rule matched) all show a plain-language
-  error, never a raw traceback - checked directly in `tests/test_ui.py`,
-  including a case that forces an unexpected exception via mocking to
-  confirm the defensive net actually works, not just that it exists.
+  unknown `DeviceAttributes` fields, undetermined classifications, a
+  corrupt or textless upload, and OCR being unavailable in the current
+  environment all show a plain-language message, never a raw traceback -
+  checked directly in `tests/test_ui.py`, including cases that force
+  failures via mocking to confirm the defensive nets actually work, not
+  just that they exist.
+- **A real frontend bug the test suite couldn't catch, found by actually
+  running it**: `st.navigation(position="top")` looked right and passed
+  every automated test, but rendered zero working navigation in a real
+  browser - Streamlit's own top-nav overflow logic collapsed both pages
+  into a permanently hidden, non-interactive "1 more" button with nothing
+  behind it. `AppTest` simulates the Python-side script, not real
+  frontend rendering, so this was invisible to the test suite; only
+  driving the live app and inspecting the actual DOM surfaced it. Fixed
+  by switching to `position="sidebar"`, Streamlit's original and far
+  more battle-tested nav placement.
 - Tested with Streamlit's own `streamlit.testing.v1.AppTest` harness
-  (runs the real app script in a simulated session, no browser needed) -
-  100% statement coverage across `ui/app.py`, `ui/render.py` and
-  `ui/examples.py`.
+  (runs the real page script in a simulated session, no browser needed)
+  for logic and wiring, plus a live-browser pass (the two bugs above)
+  for what `AppTest` structurally can't see - 100% statement coverage
+  across `ui/app.py`, `ui/render.py`, `ui/examples.py`,
+  `ui/file_extraction.py`, and `ui/pages/`, including real (not mocked)
+  OCR tests against Tesseract.
 
 **Run locally:**
 
@@ -190,10 +238,18 @@ pip install -e ".[ui]"
 streamlit run ui/app.py
 ```
 
+Image upload needs the Tesseract OCR binary installed separately (the
+Python package `pytesseract` is just a wrapper around it) - e.g.
+`winget install tesseract-ocr.tesseract` on Windows, `brew install
+tesseract` on macOS, `apt install tesseract-ocr` on Debian/Ubuntu.
+Everything else works with no extra setup; if Tesseract isn't found,
+image upload degrades to a clear in-app message rather than crashing.
+
 **Deploy:** point [Streamlit Community Cloud](https://streamlit.io/cloud)
 (free) at this repo with main file path `ui/app.py` - `requirements.txt`
-at the repo root is picked up with no further config. `.streamlit/config.toml`
-sets a clean default theme.
+and `packages.txt` (the Tesseract system dependency) at the repo root
+are both picked up with no further config. `.streamlit/config.toml` sets
+the dark default theme.
 
 ## Regulatory grounding
 
@@ -292,7 +348,7 @@ published industry classification figure, and explains why.
 All 22 Annex VIII rules now have real, MDCG-sourced ground-truth test
 cases, and `rules_engine/eu_mdr/rules.py`, `extraction/keyword_extractor.py`,
 `standards_mapper/eu_mdr/` (requirements + mapper), and `ui/` all sit at
-100% statement coverage (318 tests total) - see `docs/legal_sources/` for
+100% statement coverage (349 tests total) - see `docs/legal_sources/` for
 the retrieved source excerpts behind every citation in this codebase.
 
 ## Usage
@@ -345,13 +401,19 @@ standards_mapper/
     requirements.py    14 GSPR requirement categories
     mapper.py           EUMDRStandardsMapper
 ui/
-  app.py               Streamlit entry point (streamlit run ui/app.py)
-  render.py            Display helpers app.py calls
+  app.py               Router (streamlit run ui/app.py) - st.navigation only
+  pages/
+    home.py             Homepage: what/why/how, no classification logic
+    classify.py          The tool itself - input, then full audit-trail output
+  render.py            Display helpers classify.py calls
+  style.py              Dark theme CSS injected into every page
   examples.py          Curated demo data (no Streamlit import - see Phase 4 above)
+  file_extraction.py   PDF/DOCX/TXT text extraction + image OCR (also no Streamlit import)
 cli.py                 CLI harness (structured JSON or --text)
 examples/               Sample DeviceAttributes JSON files
-tests/                  318 unit tests
+tests/                  349 unit tests
 docs/legal_sources/     Verbatim EUR-Lex + MDCG source text this was built against
-requirements.txt        For Streamlit Community Cloud's zero-config deploy
+requirements.txt        Python deps for Streamlit Community Cloud's zero-config deploy
+packages.txt            System (apt) deps for the same - just tesseract-ocr
 .streamlit/config.toml  UI theme
 ```

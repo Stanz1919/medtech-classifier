@@ -1,7 +1,14 @@
-"""Smoke tests for the Streamlit UI (ui/app.py), using Streamlit's own
-streamlit.testing.v1.AppTest harness - it runs the real app script in a
-simulated session and lets us assert on the resulting widget tree,
-rather than needing a browser.
+"""Smoke tests for the Streamlit UI (ui/app.py's router and its pages),
+using Streamlit's own streamlit.testing.v1.AppTest harness - it runs the
+real page script in a simulated session and lets us assert on the
+resulting widget tree, rather than needing a browser.
+
+Each page is tested by pointing AppTest directly at its file
+(ui/pages/classify.py, ui/pages/home.py) rather than at the ui/app.py
+router - AppTest runs one script at a time, and a page script behaves
+identically whether it was reached via st.navigation or run standalone
+(neither page calls st.set_page_config, which lives solely in the
+router - see ui/app.py's module docstring).
 
 These are deliberately smoke-level, not a re-test of the extractor or
 rules engine (those already have their own exhaustive suites) - the
@@ -20,11 +27,13 @@ from streamlit.testing.v1 import AppTest
 
 from ui.examples import JSON_EXAMPLES, TEXT_EXAMPLES
 
-APP_PATH = str(Path(__file__).resolve().parent.parent / "ui" / "app.py")
+UI_DIR = Path(__file__).resolve().parent.parent / "ui"
+CLASSIFY_PAGE_PATH = str(UI_DIR / "pages" / "classify.py")
+HOME_PAGE_PATH = str(UI_DIR / "pages" / "home.py")
 
 
 def _fresh_app() -> AppTest:
-    at = AppTest.from_file(APP_PATH)
+    at = AppTest.from_file(CLASSIFY_PAGE_PATH)
     at.run()
     assert not at.exception, f"App raised on initial load: {at.exception}"
     return at
@@ -196,3 +205,180 @@ def test_ambiguous_rule_flag_shown_for_ancillary_joint_component():
     assert not at.exception
     assert at.metric[0].value == "Class IIb"
     assert any("JUDGEMENT CALL FLAGGED" in w.value for w in at.warning)
+
+
+# --- Router / navigation (ui/app.py) ---
+# Tested by pointing AppTest at the router itself, not at a page in
+# isolation: st.switch_page() resolves paths relative to the "main
+# script," which only exists correctly when the router is the entry
+# point - see this file's module docstring.
+
+
+def test_router_shows_home_page_by_default():
+    at = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "ui" / "app.py"))
+    at.run()
+    assert not at.exception
+    assert any("Start classifying" in b.label for b in at.button)
+
+
+def test_router_start_classifying_button_navigates_to_classify_page():
+    at = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "ui" / "app.py"))
+    at.run()
+    at.button[0].click().run()
+    assert not at.exception
+    assert any(t.value == "⚕️ Classify a device" for t in at.title)
+
+
+# --- Home page content (standalone) ---
+
+
+def _fresh_home() -> AppTest:
+    at = AppTest.from_file(HOME_PAGE_PATH)
+    at.run()
+    assert not at.exception, f"Home page raised on load: {at.exception}"
+    return at
+
+
+def test_home_page_loads_without_exception_and_has_cta():
+    at = _fresh_home()
+    assert any("Start classifying" in b.label for b in at.button)
+
+
+def test_home_page_shows_all_four_risk_classes():
+    at = _fresh_home()
+    badge_values = [b.label for b in at.get("badge")] if at.get("badge") else []
+    # st.badge elements aren't exposed under a dedicated at.badge accessor
+    # in this Streamlit version - fall back to full page markdown text.
+    text = " ".join(m.value for m in at.markdown) + " ".join(c.value for c in at.caption)
+    for cls in ["Class I", "Class IIa", "Class IIb", "Class III"]:
+        assert cls in text or cls in str(badge_values)
+
+
+def test_home_page_shows_disclaimer():
+    at = _fresh_home()
+    assert any("not real regulatory or legal advice" in c.value for c in at.caption)
+
+
+# --- Document / image upload wiring (ui/pages/classify.py) ---
+
+
+def _make_docx_bytes(text: str) -> bytes:
+    import io
+
+    import docx
+
+    d = docx.Document()
+    d.add_paragraph(text)
+    buf = io.BytesIO()
+    d.save(buf)
+    return buf.getvalue()
+
+
+def _make_ocr_image_bytes(text: str) -> bytes:
+    import io
+
+    from PIL import Image, ImageDraw
+
+    img = Image.new("RGB", (600, 120), color="white")
+    ImageDraw.Draw(img).text((10, 40), text, fill="black")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def test_uploaded_txt_document_previews_and_populates_description():
+    at = _fresh_app()
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload("spec.txt", b"A titanium hip replacement implant intended for permanent placement.").run()
+    assert not at.exception
+    # Preview shown before the user opts to add it to the description.
+    assert any("spec.txt" in e.label for e in at.sidebar.expander)
+    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    add_button.click().run()
+    assert "hip replacement implant" in at.sidebar.text_area[0].value.lower()
+    at.sidebar.button[-1].click().run()  # Classify
+    assert not at.exception
+    assert at.metric[0].value == "Class III"
+
+
+def test_uploaded_docx_document_reaches_expected_class():
+    at = _fresh_app()
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload(
+        "spec.docx",
+        _make_docx_bytes("A cardiac pacemaker implanted permanently to regulate heart rhythm."),
+        mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ).run()
+    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    add_button.click().run()
+    at.sidebar.button[-1].click().run()
+    assert not at.exception
+    assert at.metric[0].value == "Class III"
+
+
+def test_uploaded_image_is_ocrd_and_reaches_expected_class():
+    """Real Tesseract OCR through the full UI wiring, not mocked - see
+    tests/test_file_extraction.py for the module-level OCR tests."""
+    at = _fresh_app()
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload("drawing.png", _make_ocr_image_bytes("Implantable cardiac pacemaker"), mime_type="image/png").run()
+    assert not at.exception
+    add_button = next(b for b in at.sidebar.button if "Add extracted text" in b.label)
+    add_button.click().run()
+    assert "pacemaker" in at.sidebar.text_area[0].value.lower()
+    at.sidebar.button[-1].click().run()
+    assert not at.exception
+    assert at.metric[0].value == "Class III"
+
+
+def test_uploaded_image_with_no_visible_text_shows_no_text_found_warning():
+    """Honest degradation, not a crash or a guess: OCR on an image with
+    nothing printed on it must say so plainly (see ui/file_extraction.py's
+    module docstring on why this tool won't try to interpret a bare
+    photo's shape/appearance)."""
+    import io
+
+    from PIL import Image
+
+    at = _fresh_app()
+    blank = Image.new("RGB", (200, 200), color="white")
+    buf = io.BytesIO()
+    blank.save(buf, format="PNG")
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload("device_photo.png", buf.getvalue(), mime_type="image/png").run()
+    assert not at.exception
+    assert any("No text found" in w.value for w in at.sidebar.warning)
+    assert not any("Add extracted text" in b.label for b in at.sidebar.button)
+
+
+def test_uploaded_image_when_tesseract_unavailable_shows_friendly_warning():
+    """Patched at ui.file_extraction's own pytesseract import, not at
+    ui.pages.classify - patch()'s string form would import the page
+    directly to resolve the target, which (like any plain import of a
+    Streamlit script) crashes outside a real session. Same reasoning as
+    tests/test_ui.py's KeywordExtractor mock from the Phase 4 suite."""
+    import pytesseract
+
+    at = _fresh_app()
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload("drawing.png", _make_ocr_image_bytes("Implantable cardiac pacemaker"), mime_type="image/png").run()
+    with patch.object(pytesseract, "image_to_string", side_effect=pytesseract.TesseractNotFoundError()):
+        at.run()
+    assert not at.exception
+    assert any("OCR isn't available" in w.value for w in at.sidebar.warning)
+    assert not any("Add extracted text" in b.label for b in at.sidebar.button)
+
+
+def test_uploaded_corrupt_image_shows_warning_not_a_crash():
+    """A validly-named .png that isn't actually a decodable image - the
+    one upload-time failure the file_uploader widget's own `type=`
+    restriction can't prevent (unlike a wrong extension, which Streamlit
+    itself blocks before this app's code ever runs - see
+    tests/test_file_extraction.py::test_extract_text_from_upload_rejects_unsupported_extension
+    for that defensive path instead)."""
+    at = _fresh_app()
+    uploader = at.sidebar.get("file_uploader")[0]
+    uploader.upload("drawing.png", b"not actually a png file", mime_type="image/png").run()
+    assert not at.exception
+    assert any("drawing.png" in w.value for w in at.sidebar.warning)
+    assert not any("Add extracted text" in b.label for b in at.sidebar.button)

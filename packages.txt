@@ -1,0 +1,6 @@
+# System (apt) dependencies for Streamlit Community Cloud - installed
+# automatically alongside requirements.txt before the app runs. Only
+# needed for the image-upload OCR feature (ui/file_extraction.py); the
+# rest of this project needs nothing beyond the Python packages in
+# requirements.txt.
+tesseract-ocr

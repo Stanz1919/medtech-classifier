@@ -14,7 +14,7 @@ readme = "README.md"
 # outside the standard library - both groups below are purely for the
 # dev/demo tooling around them.
 dev = ["pytest", "coverage"]
-ui = ["streamlit>=1.61"]
+ui = ["streamlit>=1.61", "pypdf>=6.0", "python-docx>=1.2", "pytesseract>=0.3.13", "Pillow>=11.0"]
 
 [tool.setuptools.packages.find]
 include = ["rules_engine*", "extraction*", "standards_mapper*", "ui*"]

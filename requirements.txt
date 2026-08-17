@@ -1,11 +1,18 @@
 # For Streamlit Community Cloud (and any plain `pip install -r requirements.txt`
-# deploy): the only third-party runtime dependency this project has. The
+# deploy): the third-party runtime dependencies this project has. The
 # rules_engine / extraction / standards_mapper / cli packages use nothing
-# outside the Python standard library - see pyproject.toml for the full
-# picture, including the [dev]/[ui] optional-dependency groups this file
-# mirrors the "ui" one of.
+# outside the Python standard library - everything below is for the UI
+# and its document/image upload feature. See pyproject.toml for the
+# [dev]/[ui] optional-dependency groups this file mirrors the "ui" one
+# of, and packages.txt (repo root) for the one non-Python dependency
+# (the Tesseract OCR binary) Streamlit Community Cloud needs alongside
+# this file.
 #
-# Pinned to >=1.61, the version this UI was actually built and tested
-# against (st.badge and the width="stretch" sizing API are used directly -
-# not verified against any older release).
+# Versions below are floors, not exact pins - each is the version this
+# feature was actually built and tested against, not just assumed
+# compatible.
 streamlit>=1.61
+pypdf>=6.0
+python-docx>=1.2
+pytesseract>=0.3.13
+Pillow>=11.0
